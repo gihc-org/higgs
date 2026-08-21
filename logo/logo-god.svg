@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-640 -350 1280 740">
+  <g fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Trefolieknude: ét kontinuerligt linjeforløb med tre blade og tre kryds -->
+    <path d="M 0 0
+             C 149 -213 185 -315 0 -315
+             C -185 -315 -149 -213 0 0
+             L 90 130
+             C 176 253 320 330 430 320
+             C 520 325 590 300 590 240
+             C 590 180 500 140 430 145
+             C 300 135 180 130 90 130
+             L -90 130
+             C -180 130 -300 135 -430 145
+             C -500 140 -590 180 -590 240
+             C -590 300 -520 325 -430 320
+             C -320 330 -176 253 -90 130
+             L 0 0 Z"/>
+    <!-- Afrundet omvendt trekant lagt ovenpå -->
+    <path d="M -115 -105
+             L 115 -105
+             Q 300 -105 212 57
+             L 111 241
+             Q 0 445 -111 241
+             L -212 57
+             Q -300 -105 -115 -105 Z"/>
+    <!-- Prikker -->
+    <circle cx="0" cy="-205" r="20"/>
+    <circle cx="-165" cy="-10" r="20"/>
+    <circle cx="165" cy="-10" r="20"/>
+    <circle cx="-395" cy="250" r="20"/>
+    <circle cx="395" cy="250" r="20"/>
+    <circle cx="0" cy="255" r="20"/>
+  </g>
+</svg>

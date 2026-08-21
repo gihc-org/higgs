@@ -1,0 +1,23 @@
+QI test
+
+I sidste opslag brød jeg en tegning op for at hjælpe en AI på vej. Denne gang vendte jeg det om og gjorde opgaven sværere.
+
+Den oprindelige tegning har seks prikker – tre lag: 1, 2, 3. Så jeg spurgte: hvad nu med fire lag? Ti prikker. Hvordan skal linjerne løbe så?
+
+Claude Opus 5 gik grundigt til værks. Den målte prikkerne op, opdagede at de sidder i et perfekt trekantgitter, regnede afstandene igennem – og byggede to forslag ud fra geometrien.
+
+Så viste jeg opgaven til min far. Han er 80. Han kender legen.
+
+Han løste den i første forsøg. Og jeg synes hans er den bedste af de tre.
+
+Kig på forskellen. Claude opfandt en ny figur til opgaven – en sekskant – fordi de seks midterste prikker rent faktisk danner en regulær sekskant. Matematisk korrekt. Min far gjorde noget andet: han tegnede den samme knude tre gange, drejet, én til hver gruppe af prikker. Ingen ny figur. Bare legens eget sprog, gentaget. Og den sidste prik lod han ligge i midten, dér hvor de tre knuder alligevel krydser hinanden.
+
+Maskinen løste opgaven. Min far forstod legen.
+
+Det er nok forskellen lige nu. Modellerne er trænet på alt det, der er skrevet ned. Den her leg er aldrig blevet skrevet ned. Den er blevet vist.
+
+Titlen er med vilje stavet forkert. På QI får man ikke point for det rigtige svar – man får point for det interessante. Og det er ikke intelligens, der mangler hos maskinen. Det er kendskab til legen.
+
+Hvad kan I, som ingen model kan slå op?
+
+#AI #QI #GenerativeAI #PromptEngineering

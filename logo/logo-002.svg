@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-640 -340 1280 735">
+  <g fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Trefolieknude: ét kontinuerligt forløb af lige stykker og cirkelbuer.
+         Strengene krydser hinanden i 60° og danner en ligesidet midttrekant.
+         Alle tre bladspidser har samme bueradius (100). -->
+    <path d="M 0 0
+             L 86.6 -150
+             A 100 100 0 1 0 -86.6 -150
+             L 0 0
+             L 90 155.9
+             A 400 400 0 0 0 436.4 355.9
+             L 494.5 355.9
+             A 100 100 0 0 0 494.5 155.9
+             L -90 155.9
+             L -494.5 155.9
+             A 100 100 0 0 0 -494.5 355.9
+             L -436.4 355.9
+             A 400 400 0 0 0 -90 155.9
+             L 0 0 Z"/>
+    <!-- Afrundet omvendt trekant: lige sider, cirkulære hjørner -->
+    <path d="M -138.8 -105
+             L 138.8 -105
+             A 100 100 0 0 1 228.4 39.5
+             L 113.7 270.5
+             A 127 127 0 0 1 -113.7 270.5
+             L -228.4 39.5
+             A 100 100 0 0 1 -138.8 -105 Z"/>
+    <!-- Prikker -->
+    <circle cx="0" cy="-200" r="20"/>
+    <circle cx="-165" cy="-10" r="20"/>
+    <circle cx="165" cy="-10" r="20"/>
+    <circle cx="-395" cy="250" r="20"/>
+    <circle cx="395" cy="250" r="20"/>
+    <circle cx="0" cy="255" r="20"/>
+  </g>
+</svg>

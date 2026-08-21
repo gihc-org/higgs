@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-660 -660 1320 1320">
+  <!-- Fire lag prikker (1+2+3+4 = 10) i samme trekantgitter som logo-symmetrisk.svg,
+       pitch 277.1. Prikkerne falder i tre baner om centrum:
+         3 hjørner   i radius  480.0 (= pitch * √3)  ved  90°, 210°, 330°
+         6 kanter    i radius  277.1 (= pitch)       ved  0°, 60°, ... 300°  – en regulær sekskant
+         1 centrum   i radius    0
+       Hver bane får sin egen kurve. Samme princip som tre-lags-udgaven. -->
+  <g fill="none" stroke="#1a1a1a" stroke-width="13" stroke-linejoin="round">
+
+    <!-- Trefolieknude om de tre hjørneprikker: løkker med r = 150 i radius 480,
+         forbundet af fælles tangenter. De tre streger krydser og indrammer centrum. -->
+    <path d="M -129.90 -404.95
+             A 150 150 0 1 1  129.90 -404.95
+             L -285.75  314.98
+             A 150 150 0 1 1 -415.65   89.98
+             L  415.65   89.98
+             A 150 150 0 1 1  285.75  314.98
+             Z"/>
+
+    <!-- Afrundet sekskant om de seks kantprikker: spidser i radius 380,
+         hjørneradius 110. Afløser trekanten fra tre-lags-udgaven. -->
+    <path d="M  348.25  -55
+             L  221.75 -274.09
+             A 110 110 0 0 0  126.49 -329.09
+             L -126.49 -329.09
+             A 110 110 0 0 0 -221.75 -274.09
+             L -348.25  -55
+             A 110 110 0 0 0 -348.25   55
+             L -221.75  274.09
+             A 110 110 0 0 0 -126.49  329.09
+             L  126.49  329.09
+             A 110 110 0 0 0  221.75  274.09
+             L  348.25   55
+             A 110 110 0 0 0  348.25  -55
+             Z"/>
+
+    <!-- Ti prikker: 3 i knudens løkker, 6 i sekskantens hjørner,
+         1 i den lille trekant hvor knudens streger krydser. -->
+    <g fill="#1a1a1a" stroke="none">
+      <circle cx="   0.0" cy="-480" r="22"/>
+      <circle cx="-415.6" cy=" 240" r="22"/>
+      <circle cx=" 415.6" cy=" 240" r="22"/>
+      <circle cx=" 277.1" cy="   0" r="22"/>
+      <circle cx=" 138.6" cy="-240" r="22"/>
+      <circle cx="-138.6" cy="-240" r="22"/>
+      <circle cx="-277.1" cy="   0" r="22"/>
+      <circle cx="-138.6" cy=" 240" r="22"/>
+      <circle cx=" 138.6" cy=" 240" r="22"/>
+      <circle cx="   0.0" cy="   0" r="22"/>
+    </g>
+  </g>
+</svg>

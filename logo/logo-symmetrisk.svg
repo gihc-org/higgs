@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-422 -465 844 770">
+  <!-- Symmetrisk udgave af tegningen: 3-foldig rotationssymmetri (120°) om origo,
+       plus spejling om den lodrette akse. Alle mål er afledt af to radier. -->
+  <g fill="none" stroke="#1a1a1a" stroke-width="13" stroke-linejoin="round">
+
+    <!-- Trefolieknude: ét kontinuerligt forløb.
+         Tre cirkulære løkker (r = 125) med centre i radius 320 ved 90°, 210°, 330°,
+         forbundet af tre rette stykker, der er fælles tangenter til løkkerne.
+         De tre streger krydser hinanden og danner den lille midtertrekant. -->
+    <path d="M -108.25 -257.5
+             A 125 125 0 1 1  108.25 -257.5
+             L -168.87  222.5
+             A 125 125 0 1 1 -277.13   35
+             L  277.13   35
+             A 125 125 0 1 1  168.87  222.5
+             Z"/>
+
+    <!-- Afrundet trekant, drejet 60° i forhold til løkkerne:
+         spidser i radius 340 ved 30°, 150°, 270°, hjørneradius 105. -->
+    <path d="M  112.58 -170
+             L -112.58 -170
+             A 105 105 0 0 0 -203.52  -12.5
+             L  -90.93  182.5
+             A 105 105 0 0 0   90.93  182.5
+             L  203.52  -12.5
+             A 105 105 0 0 0  112.58 -170
+             Z"/>
+
+    <!-- Seks prikker: tre i løkkernes centre (90°, 210°, 330°),
+         tre inde i trekantens hjørner (30°, 150°, 270°). -->
+    <g fill="#1a1a1a" stroke="none">
+      <circle cx="   0.0" cy="-320" r="22"/>
+      <circle cx="-277.1" cy=" 160" r="22"/>
+      <circle cx=" 277.1" cy=" 160" r="22"/>
+      <circle cx=" 138.6" cy=" -80" r="22"/>
+      <circle cx="-138.6" cy=" -80" r="22"/>
+      <circle cx="   0.0" cy=" 160" r="22"/>
+    </g>
+  </g>
+</svg>
