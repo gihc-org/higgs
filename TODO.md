@@ -28,6 +28,8 @@
 - [x] Rækkefølge styres nu eksplicit: build.py understøtter tidspunkt i
       `date` (RFC 3339), og begge poster har fået reelle tider
       (Hej verden 17:46, monero 18:05, +02:00) — **afventer deploy**
+- [x] Deploy-script: `scripts/deploy.sh` (tunnel + byg + apply + rollout +
+      verificér; `--sync-media` for medier) — `make deploy` kalder scriptet
 
 ## Beslutninger (foreløbige)
 

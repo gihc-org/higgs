@@ -93,6 +93,7 @@ higgs/
 │   └── 2026-08-31-foerste-post.md
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
+│   ├── deploy.sh             # tunnel + byg + apply + verificér (--sync-media)
 │   └── create-dns-record.sh  # A-record hos Simply.com — IP som arg eller udledt fra zonen
 ├── build.py                  # generatoren: content/ → k8s/feed.xml
 ├── Makefile                  # build / verify / deploy / sync-media
@@ -171,17 +172,21 @@ make verify   # tjekker feed.xml (XML) og logo.png (PNG)
 
 ### Deploy
 
-Kræver en SSH-tunnel til k3s og `kubectl`:
+`scripts/deploy.sh` (eller `make deploy`) klarer hele flowet i ét kald: åbner
+SSH-tunnelen hvis den ikke kører, bygger, deployer, venter på rollout og
+verificerer HTTP 200 + `application/atom+xml` + titlen "Higgs".
 
 ```bash
-ssh -N -f -L 6443:localhost:6443 -o ServerAliveInterval=30 hetzner-k3s
-make deploy   # kører kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
+scripts/deploy.sh
+scripts/deploy.sh --sync-media   # uploader også lokalt media/ til PVC
 ```
 
-Verificér bagefter:
+Har du ændret medier, skal du bruge `--sync-media` (eller køre
+`make sync-media` bagefter). Manuelt svarer flowet til:
 
 ```bash
-curl -sS https://higgs.gihc.online/feed.xml | head
+ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s
+kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
 ```
 
 ### DNS (kun ved nye subdomæner)

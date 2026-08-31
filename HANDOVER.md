@@ -39,8 +39,8 @@ medie-episode (m4a på PVC), og feed, medier og logo er testet i AntennaPod.
   `ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s`
   (tunnelen kan hænge — genstart ved fejl).
 - Ny post/episode: fil i `media/` → front matter med `media:` →
-  `make build` → `kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/`
-  → `make sync-media` → verificér.
+  `scripts/deploy.sh --sync-media` (tunnel + byg + apply + medier +
+  verificér i ét kald; se README).
 - Deployment bruger `Recreate` (RWO PVC). ConfigMap får content-hash via
   kustomize, så ændringer i feed.xml/logo genstarter pod'en automatisk.
 
