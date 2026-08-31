@@ -4,8 +4,8 @@ Et helt simpelt statisk Atom-feed, live på
 [https://higgs.gihc.online/feed.xml](https://higgs.gihc.online/feed.xml).
 
 Status: **fase 1 i drift.** Feedet er deployet på k3s, udgiver to poster —
-inkl. den første medie-episode (m4a på PVC) — og er testet i en rigtig
-feed-læser (AntennaPod).
+inkl. den første medie-episode (m4a på PVC) — og feed, medier og logo er
+testet i en rigtig feed-læser (AntennaPod).
 
 ## Hvorfor findes higgs?
 
@@ -38,10 +38,10 @@ content/*.md  →  build.py  →  k8s/feed.xml  →  ConfigMap (kustomize)
    - sortering nyeste først;
    - markdown → HTML med `python3-markdown` (eksekverer ikke kode);
    - enclosure-støtte med automatisk `length` fra de lokale medie-filer.
-3. **Kustomize** lægger `feed.xml` i en ConfigMap via `configMapGenerator`.
-   Hver gang filen ændrer sig, får ConfigMap'en et nyt content-hash i navnet →
-   deployment'et ændrer sig → atomisk rolling update. Ingen image-build,
-   ingen push til registry.
+3. **Kustomize** lægger `feed.xml` + logo-filerne i en ConfigMap via
+   `configMapGenerator`. Hver gang en fil ændrer sig, får ConfigMap'en et nyt
+   content-hash i navnet → deployment'et ændrer sig → atomisk rolling update.
+   Ingen image-build, ingen push til registry.
 4. **nginx** serverer filen statisk. En lille conf-override i ConfigMap'en
    sikrer `Content-Type: application/atom+xml` (nginx sender ellers
    `text/xml`). ETag/Last-Modified og HTTP Range kommer automatisk.
@@ -74,26 +74,29 @@ senere uden at bryde noget for læsere.
 higgs/
 ├── content/                  # markdown-poster — kilden til feedet
 │   └── 2026-08-31-foerste-post.md
+├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
 │   └── create-dns-record.sh  # A-record hos Simply.com (idempotent)
 ├── build.py                  # generatoren: content/ → k8s/feed.xml
 ├── Makefile                  # build / verify / deploy / sync-media
-├── k8s/                      # manifests + genereret feed.xml
-│   ├── kustomization.yaml    # configMapGenerator: feed.xml + nginx-override
+├── k8s/                      # manifests + genererede artefakter
+│   ├── kustomization.yaml    # configMapGenerator: feed + logo + nginx-override
 │   ├── deployment.yaml       # nginx:alpine, mount af ConfigMap (feed + logo)
 │   ├── service.yaml
 │   ├── ingress.yaml          # higgs.gihc.online, letsencrypt-prod
 │   ├── pvc.yaml              # higgs-media (5Gi, local-path) — medier
 │   ├── logo.svg              # genereret kopi af logo-symmetrisk.svg
+│   ├── logo.png              # genereret 1024×1024 PNG (feed-artwork)
 │   └── nginx/default.conf    # Content-Type-override for feed.xml
+├── AGENTS.md                 # arbejdsregler for AI-agenter
 ├── STRATEGI.md               # den oprindelige strategi
 ├── TODO.md                   # status og tjekliste
 └── README.md
 ```
 
-`media/` og `k8s/feed.xml` er gitignoreret — det første fordi binære medier
-ikke hører i git, det andet fordi det er et genereret artefakt. Det samme
-gælder `k8s/logo.svg` (en kopi af `logo/logo-symmetrisk.svg`).
+`media/`, `k8s/feed.xml`, `k8s/logo.svg` og `k8s/logo.png` er gitignoreret —
+det første fordi binære medier ikke hører i git, de øvrige fordi de er
+genererede artefakter (genskabes af `make build`).
 
 Feedets `<logo>`/`<icon>` peger på `https://higgs.gihc.online/logo.png` — en
 1024×1024 PNG (hvid baggrund) af den symmetriske tre-lags-udgave af den
@@ -103,6 +106,12 @@ ikke kan afkode SVG som artwork; selve SVG'en serveres også som
 i ConfigMap'en sammen med feed.xml.
 
 ## Daglig brug
+
+### Krav
+
+- Python 3 + `python3-markdown` (generatoren)
+- ImageMagick (`convert` — genererer `k8s/logo.png` fra SVG'en)
+- `kubectl` + en SSH-tunnel til k3s (kun til deploy)
 
 ### Tilføj en post
 
@@ -134,8 +143,8 @@ Generatoren beregner filstørrelsen og udsender
 ### Byg og verificér
 
 ```bash
-make build    # content/ → k8s/feed.xml
-make verify   # tjekker at feed.xml er gyldig XML
+make build    # content/ → k8s/feed.xml + logo.svg + logo.png
+make verify   # tjekker feed.xml (XML) og logo.png (PNG)
 ```
 
 ### Deploy
@@ -143,7 +152,7 @@ make verify   # tjekker at feed.xml er gyldig XML
 Kræver en SSH-tunnel til k3s og `kubectl`:
 
 ```bash
-ssh -N -f -L 6443:localhost:6443 hetzner-k3s
+ssh -N -f -L 6443:localhost:6443 -o ServerAliveInterval=30 hetzner-k3s
 make deploy   # kører kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
 ```
 
@@ -174,6 +183,9 @@ og springer over, hvis recorden allerede findes.
   `/usr/share/nginx/html/media`, og `make sync-media` uploader fra lokalt
   `media/`. Deployment'et bruger `Recreate`, fordi PVC'en er ReadWriteOnce.
   Stabile stier er exit-strategien.
+- **Logo: SVG som kilde, PNG til feedet.** `logo/logo-symmetrisk.svg` er
+  kilden; `make build` genererer både SVG- og PNG-kopier til ConfigMap'en.
+  Feedet bruger PNG, fordi podcast-klienter ikke afkoder SVG.
 - **IPFS i fase 2 — som ekstra sti, ikke erstatning.** Hovedkanalen forbliver
   plain HTTPS fra nginx; IPFS bliver en anden enclosure mod egen gateway, så
   intet afhænger af, at IPFS virker. Se dialog-notatet
@@ -184,6 +196,8 @@ og springer over, hvis recorden allerede findes.
 - Første medie-episode er live; tilføj flere poster/episoder i samme flow
   (fil i `media/` → front matter med `media:` → `make build` + deploy +
   `make sync-media`).
+- Medie-backup-strategi: lige nu findes hver fil kun lokalt og på serverens
+  PVC.
 - Fase 2: Kubo-gateway-pod, CID-beregning i build.py, ipfs-cluster (CRDT) på
   VPS + Pi + laptop. WebTorrent/Handshake forbliver research indtil videre.
 - Følg med i [TODO.md](TODO.md).

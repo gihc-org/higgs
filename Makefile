@@ -7,6 +7,7 @@ build:
 
 verify: build
 	python3 -c "import xml.etree.ElementTree as ET; ET.parse('k8s/feed.xml'); print('feed.xml: gyldig XML')"
+	file k8s/logo.png | grep -q "PNG image data" && echo "logo.png: ok"
 
 deploy: build
 	kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
