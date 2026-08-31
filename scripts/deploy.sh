@@ -76,12 +76,22 @@ if [ "$SYNC_MEDIA" = 1 ]; then
 fi
 
 echo "== verificér =="
-HTTP_CT="$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$FEED_URL")"
+# Lige efter en Recreate-rollout kan ingressen kortvarigt svare 503,
+# indtil det nye pod er registreret som endpoint — prøv igen med pauser.
+attempt=0
+while [ "$attempt" -lt 10 ]; do
+    HTTP_CT="$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$FEED_URL" || true)"
+    CODE="${HTTP_CT%% *}"
+    [ "$CODE" = "200" ] && break
+    attempt=$((attempt + 1))
+    echo "verificér: HTTP ${CODE:-fejl} — prøver igen om 3 s ($attempt/10)"
+    sleep 3
+done
 CODE="${HTTP_CT%% *}"
 CT="${HTTP_CT#* }"
 TITLE_OK="$(curl -sS "$FEED_URL" | grep -q '<title>Higgs</title>' && echo ja || echo nej)"
 
-[ "$CODE" = "200" ] || { echo "FEJL: HTTP $CODE på $FEED_URL" >&2; exit 1; }
+[ "$CODE" = "200" ] || { echo "FEJL: HTTP ${CODE:-ingen respons} på $FEED_URL efter 10 forsøg" >&2; exit 1; }
 case "$CT" in
     application/atom+xml*) ;;
     *) echo "FEJL: Content-Type er '$CT' (forventet application/atom+xml)" >&2; exit 1 ;;

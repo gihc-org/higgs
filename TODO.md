@@ -29,7 +29,8 @@
       `date` (RFC 3339), og begge poster har fået reelle tider
       (Hej verden 17:46, monero 18:05, +02:00) — **afventer deploy**
 - [x] Deploy-script: `scripts/deploy.sh` (tunnel + byg + apply + rollout +
-      verificér; `--sync-media` for medier) — `make deploy` kalder scriptet
+      verificér med retries efter Recreate-503; `--sync-media` for medier) —
+      `make deploy` kalder scriptet
 
 ## Beslutninger (foreløbige)
 
