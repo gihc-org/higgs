@@ -38,8 +38,10 @@
   - [x] `k8s/ipfs.yaml`: Kubo-gateway (deployment + service + PVC), ingress-rule
         for `ipfs.higgs.gihc.online` (gateway på 0.0.0.0:8080, `NoFetch`)
   - [x] `scripts/sync-ipfs.sh`: pin media/ i gateway-pod'en (samme CIDs)
-  - [ ] **Afventer**: DNS-record for `ipfs.higgs.gihc.online` (brugeren) +
-        deploy + `--sync-ipfs`
+  - [x] **Deployet**: gateway kører, medier pinned (CID matcher build.py),
+        live feed indeholder IPFS-enclosure
+  - [ ] **Afventer brugeren**: offentlig `curl` af gateway-URL'en (DNS + cert
+        verificeres fra brugerens maskine)
   - [ ] ipfs-cluster (CRDT) på VPS + Pi + laptop — redundant pinning/backup
 
 ## Beslutninger (foreløbige)
@@ -85,8 +87,7 @@
 
 ## Fase 2 — IPFS som ekstra sti (senere)
 
-- [ ] Kubo-gateway-pod i k3s, eksponeret via ingress — **scaffoldet**,
-      afventer DNS + deploy
+- [x] Kubo-gateway-pod i k3s, eksponeret via ingress — **i drift**
 - [x] `build.py`: beregn CID (`ipfs add`), udsend anden enclosure mod egen gateway
 - [x] `scripts/sync-ipfs.sh`: pin medier i gateway-pod'en
 - [ ] ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant pinning
