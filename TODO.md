@@ -16,7 +16,7 @@
 ## Fase 1 — minimalt feed (nu)
 
 - [x] `.gitignore` med `media/`
-- [ ] Push til GitHub (afhænger af beslutning ovenfor)
+- [ ] Push til GitHub (brugeren pusher selv)
 - [x] Scaffold `k8s/`:
   - [x] `namespace.yaml` (namespace: higgs)
   - [x] `kustomization.yaml` med `configMapGenerator` for feed.xml (content-hash)
@@ -33,7 +33,9 @@
   - [x] Én konstant for feed-base-URL (neutralitets-anker)
 - [x] `Makefile`: `build`, `verify`, `deploy`, `sync-media`
 - [x] `content/` med første post (kladde)
-- [ ] DNS: A-record for `higgs.gihc.online` (mønster fra captures `create-dns-record.sh`)
+- [x] DNS-script: `scripts/create-dns-record.sh` (klar til kørsel)
+- [ ] DNS: A-record for `higgs.gihc.online` (kør scriptet — kræver `pass simply/…`)
+- [x] kubectl installeret lokalt (v1.37.0 i `~/.local/bin`, kustomize v5.8.1)
 - [ ] Deploy: SSH-tunnel → `make build` → `kubectl apply -k k8s/`
 - [ ] Verificér:
   - [ ] `curl https://higgs.gihc.online/feed.xml` → gyldigt LE-cert
