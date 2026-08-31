@@ -10,7 +10,8 @@ CI, ingen image-build, ingen secrets.
 
 Vendor-neutralitet er designprincippet: **feedet er produktet, hosting er
 udskiftelig.** Læs `README.md` (hvordan/hvorfor), `STRATEGI.md` (den
-oprindelige strategi) og `TODO.md` (status/tjekliste) før arbejde.
+oprindelige strategi), `TODO.md` (status/tjekliste) og `HANDOVER.md`
+(tilstand for næste session) før arbejde.
 
 ## Status
 

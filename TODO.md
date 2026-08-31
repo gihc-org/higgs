@@ -4,6 +4,19 @@
 > distributionssti. Baggrund i [STRATEGI.md](STRATEGI.md); IPFS-dialogen i
 > [87a8a829-433b-41f9-90d8-c5a659e4204e.md](87a8a829-433b-41f9-90d8-c5a659e4204e.md).
 
+## Næste session — start her
+
+> Kopiér denne prompt til næste session:
+>
+> "Læs README.md, TODO.md, AGENTS.md, STRATEGI.md og HANDOVER.md i dette
+> repo, og fortsæt derfra. Følg AGENTS.md: dansk, commit lokalt med
+> [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
+> push overlades til brugeren. Kontekst: higgs fase 1 er i drift — statisk
+> Atom-feed på https://higgs.gihc.online/feed.xml med to poster inkl. første
+> medie-episode (m4a på PVC). Seneste commit fd94c60 (DNS-script uden
+> hardcoded IP) afventer brugerens push. Mål i denne session:
+> <indsæt mål>."
+
 ## Beslutninger (foreløbige)
 
 - [x] Domæne: `higgs.gihc.online` (subdomæne; apex holdes fri)
@@ -39,7 +52,6 @@
 - [x] DNS: A-record for `higgs.gihc.online` oprettet
 - [x] kubectl installeret lokalt (v1.37.0 i `~/.local/bin`, kustomize v5.8.1)
 - [x] Deploy: SSH-tunnel → `make build` → `kubectl apply -k k8s/`
-- [ ] Verificér:
 - [x] `curl https://higgs.gihc.online/feed.xml` → HTTP 200 + gyldigt LE-cert
 - [x] Content-Type `application/atom+xml` (nginx-override virker)
 - [x] Validering i feed-læser — testet i AntennaPod (virker)
