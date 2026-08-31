@@ -1,0 +1,11 @@
+# Genereret
+k8s/feed.xml
+__pycache__/
+*.pyc
+
+# Lokale medier — aldrig i git
+media/
+
+# Editor/OS
+.DS_Store
+*.swp

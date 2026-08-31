@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: higgs
+  labels:
+    app: higgs
+spec:
+  selector:
+    app: higgs
+  ports:
+    - port: 80
+      targetPort: 80
