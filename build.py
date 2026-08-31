@@ -18,7 +18,7 @@ import markdown
 FEED_BASE = "https://higgs.gihc.online"
 FEED_PATH = "/feed.xml"
 FEED_LOGO = FEED_BASE + "/logo.png"
-FEED_TITLE = "higgs"
+FEED_TITLE = "Higgs"
 FEED_AUTHOR = "Kristian Nygaard Jensen"
 
 CONTENT_DIR = Path("content")

@@ -17,6 +17,17 @@
 > hardcoded IP) afventer brugerens push. Mål i denne session:
 > <indsæt mål>."
 
+## Session 2026-08-31 (aften)
+
+- [x] Feed-titel ændret til "Higgs" (`FEED_TITLE` i build.py) — lokalt bygget
+      og verificeret; **afventer deploy** (kræver tunnel + godkendelse)
+- [x] Årsag fundet: "Hej verden" øverst i AntennaPod skyldes, at begge poster
+      har samme tidsstempel (`2026-08-31T00:00:00Z`); AntennaPod sorterer selv
+      på pubDate og falder tilbage til appens interne DB-rækkefølge ved lige
+      datoer — feed-XML'en har selv korrekt rækkefølge (monero først)
+- [ ] Afventer brugeren: skal posternes rækkefølge styres eksplicit (fx tid
+      i front matter), eller er AntennaPods rækkefølge ok?
+
 ## Beslutninger (foreløbige)
 
 - [x] Domæne: `higgs.gihc.online` (subdomæne; apex holdes fri)
