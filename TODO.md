@@ -13,8 +13,9 @@
 > [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
 > push overlades til brugeren. Kontekst: higgs fase 1 er i drift — statisk
 > Atom-feed på https://higgs.gihc.online/feed.xml med to poster inkl. første
-> medie-episode (m4a på PVC). Seneste commit fd94c60 (DNS-script uden
-> hardcoded IP) afventer brugerens push. Mål i denne session:
+> medie-episode (m4a på PVC). Seneste commit 4d15a33 (Feed-titel: Higgs;
+> TODO om AntennaPod-rækkefølge) afventer brugerens push + deploy. Mål i
+> denne session:
 > <indsæt mål>."
 
 ## Session 2026-08-31 (aften)
