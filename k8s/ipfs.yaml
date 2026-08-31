@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: higgs-ipfs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipfs-gateway
+  labels:
+    app: ipfs-gateway
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ipfs-gateway
+  template:
+    metadata:
+      labels:
+        app: ipfs-gateway
+    spec:
+      containers:
+        - name: ipfs
+          image: ipfs/kubo:v0.42.0
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              export IPFS_PATH=/data/ipfs
+              [ -f "$IPFS_PATH/config" ] || ipfs init --profile server
+              ipfs config Gateway.Addresses --json '["/ip4/0.0.0.0/tcp/8080", "/ip6/::/tcp/8080"]'
+              ipfs config --json Gateway.NoFetch true
+              exec ipfs daemon --migrate=true
+          ports:
+            - name: gateway
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          volumeMounts:
+            - name: repo
+              mountPath: /data/ipfs
+      volumes:
+        - name: repo
+          persistentVolumeClaim:
+            claimName: higgs-ipfs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ipfs-gateway
+  labels:
+    app: ipfs-gateway
+spec:
+  selector:
+    app: ipfs-gateway
+  ports:
+    - port: 80
+      targetPort: 8080

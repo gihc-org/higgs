@@ -3,6 +3,8 @@
 
 import datetime as dt
 import re
+import shutil
+import subprocess
 import sys
 import uuid
 from dataclasses import dataclass, field
@@ -20,6 +22,9 @@ FEED_PATH = "/feed.xml"
 FEED_LOGO = FEED_BASE + "/logo.png"
 FEED_TITLE = "Higgs"
 FEED_AUTHOR = "Kristian Nygaard Jensen"
+# Fase 2: IPFS som ekstra distributionssti — gatewayen lever også her.
+# Feedet virker uden IPFS; hvis ipfs mangler, springes IPFS-enclosures over.
+FEED_IPFS_GATEWAY = "https://ipfs.higgs.gihc.online"
 
 CONTENT_DIR = Path("content")
 OUTPUT = Path("k8s/feed.xml")  # i k8s/, fordi kustomize kun kan se filer i sin mappe
@@ -128,7 +133,47 @@ def build_enclosures(meta: dict, slug: str) -> list[dict]:
                 "href": f"{FEED_BASE}/{src}",
             }
         )
+        cid = ipfs_wrap_dir_cid(p)
+        if cid:
+            out.append(
+                {
+                    "type": mime,
+                    "length": p.stat().st_size,
+                    "href": f"{FEED_IPFS_GATEWAY}/ipfs/{cid}/{p.name}",
+                }
+            )
     return out
+
+
+def ipfs_wrap_dir_cid(path: Path) -> str | None:
+    """Stabil CID for <fil> i en wrap-mappe (samme uanset maskine).
+
+    `ipfs add -w` pakker filen i en mappe opkaldt efter filnavnet; den mappe-CID
+    bruges i enclosure-URL'en, så gatewayen kan servere filen med korrekt
+    Content-Type via `/ipfs/<dirCID>/<filnavn>`. Beregnes med --only-hash, så
+    intet skrives til det lokale repo.
+    """
+    if shutil.which("ipfs") is None:
+        print("advarsel: ipfs ikke fundet — IPFS-enclosures springes over", file=sys.stderr)
+        return None
+    try:
+        proc = subprocess.run(
+            ["ipfs", "add", "-Q", "--only-hash", "--wrap-with-directory", "--cid-version", "1", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"advarsel: ipfs fejlede for {path.name} ({e}) — IPFS-enclosure springes over", file=sys.stderr)
+        return None
+    if proc.returncode != 0:
+        print(
+            f"advarsel: ipfs kunne ikke beregne CID for {path.name} "
+            f"({proc.stderr.strip() or proc.returncode}) — IPFS-enclosure springes over",
+            file=sys.stderr,
+        )
+        return None
+    return proc.stdout.strip().splitlines()[-1]
 
 
 def load_posts() -> list[Post]:

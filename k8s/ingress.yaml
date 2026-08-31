@@ -10,6 +10,9 @@ spec:
     - hosts:
         - higgs.gihc.online
       secretName: higgs-tls
+    - hosts:
+        - ipfs.higgs.gihc.online
+      secretName: higgs-ipfs-tls
   rules:
     - host: higgs.gihc.online
       http:
@@ -19,5 +22,15 @@ spec:
             backend:
               service:
                 name: higgs
+                port:
+                  number: 80
+    - host: ipfs.higgs.gihc.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ipfs-gateway
                 port:
                   number: 80

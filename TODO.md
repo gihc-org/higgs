@@ -32,6 +32,15 @@
 - [x] Deploy-script: `scripts/deploy.sh` (tunnel + byg + apply + rollout +
       verificér med retries efter Recreate-503; `--sync-media` for medier) —
       `make deploy` kalder scriptet
+- [x] Fase 2 påbegyndt (IPFS som ekstra distributionssti + backup):
+  - [x] `build.py`: anden enclosure mod egen gateway — stabil wrap-mappe-CID
+        via `ipfs add -Q --only-hash -w --cid-version 1` (`FEED_IPFS_GATEWAY`)
+  - [x] `k8s/ipfs.yaml`: Kubo-gateway (deployment + service + PVC), ingress-rule
+        for `ipfs.higgs.gihc.online` (gateway på 0.0.0.0:8080, `NoFetch`)
+  - [x] `scripts/sync-ipfs.sh`: pin media/ i gateway-pod'en (samme CIDs)
+  - [ ] **Afventer**: DNS-record for `ipfs.higgs.gihc.online` (brugeren) +
+        deploy + `--sync-ipfs`
+  - [ ] ipfs-cluster (CRDT) på VPS + Pi + laptop — redundant pinning/backup
 
 ## Beslutninger (foreløbige)
 
@@ -76,8 +85,10 @@
 
 ## Fase 2 — IPFS som ekstra sti (senere)
 
-- [ ] Kubo-gateway-pod i k3s, eksponeret via ingress
-- [ ] `build.py`: beregn CID (`ipfs add`), udsend anden enclosure mod egen gateway
+- [ ] Kubo-gateway-pod i k3s, eksponeret via ingress — **scaffoldet**,
+      afventer DNS + deploy
+- [x] `build.py`: beregn CID (`ipfs add`), udsend anden enclosure mod egen gateway
+- [x] `scripts/sync-ipfs.sh`: pin medier i gateway-pod'en
 - [ ] ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant pinning
 - [ ] README-noter om WebTorrent/Handshake som research (ikke bygget)
 

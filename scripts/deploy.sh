@@ -4,6 +4,7 @@
 # Brug:
 #   scripts/deploy.sh               # byg + apply + vent på rollout + verificér
 #   scripts/deploy.sh --sync-media  # ovenstående + upload lokalt media/ til PVC
+#   scripts/deploy.sh --sync-ipfs   # ovenstående + pin medier i IPFS-gatewayen
 #
 # Kræver: SSH-alias 'hetzner-k3s', kubectl, make, curl.
 # SSH-tunnelen (6443) åbnes automatisk, hvis porten ikke svarer lokalt.
@@ -19,9 +20,11 @@ TUNNEL_CMD=(ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes \
 FEED_URL="https://higgs.gihc.online/feed.xml"
 
 SYNC_MEDIA=0
+SYNC_IPFS=0
 for arg in "$@"; do
     case "$arg" in
         --sync-media) SYNC_MEDIA=1 ;;
+        --sync-ipfs) SYNC_IPFS=1 ;;
         -h|--help) sed -n '2,9p' "$0"; exit 0 ;;
         *) echo "ukendt argument: $arg (se --help)" >&2; exit 2 ;;
     esac
@@ -73,6 +76,11 @@ if [ "$SYNC_MEDIA" = 1 ]; then
     else
         echo "sync-media: intet i media/ — springer over"
     fi
+fi
+
+if [ "$SYNC_IPFS" = 1 ]; then
+    echo "== sync-ipfs =="
+    bash scripts/sync-ipfs.sh
 fi
 
 echo "== verificér =="

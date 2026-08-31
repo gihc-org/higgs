@@ -38,6 +38,8 @@ content/*.md  →  build.py  →  k8s/feed.xml  →  ConfigMap (kustomize)
    - sortering nyeste først;
    - markdown → HTML med `python3-markdown` (eksekverer ikke kode);
    - enclosure-støtte med automatisk `length` fra de lokale medie-filer.
+     Medier får to `<link rel="enclosure">`: én fra nginx og — hvis `ipfs` er
+     installeret — én mod egen IPFS-gateway (`FEED_IPFS_GATEWAY`).
 3. **Kustomize** lægger `feed.xml` + logo-filerne i en ConfigMap via
    `configMapGenerator`. Hver gang en fil ændrer sig, får ConfigMap'en et nyt
    content-hash i navnet → deployment'et ændrer sig → atomisk rolling update.
@@ -93,7 +95,8 @@ higgs/
 │   └── 2026-08-31-foerste-post.md
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
-│   ├── deploy.sh             # tunnel + byg + apply + verificér (--sync-media)
+│   ├── deploy.sh             # tunnel + byg + apply + verificér (--sync-media/--sync-ipfs)
+│   ├── sync-ipfs.sh          # pin media/ i gateway-pod'en (wrap-mappe-CIDs)
 │   └── create-dns-record.sh  # A-record hos Simply.com — IP som arg eller udledt fra zonen
 ├── build.py                  # generatoren: content/ → k8s/feed.xml
 ├── Makefile                  # build / verify / deploy / sync-media
@@ -103,6 +106,7 @@ higgs/
 │   ├── service.yaml
 │   ├── ingress.yaml          # higgs.gihc.online, letsencrypt-prod
 │   ├── pvc.yaml              # higgs-media (5Gi, local-path) — medier
+│   ├── ipfs.yaml             # fase 2: Kubo-gateway (deployment + service + PVC)
 │   ├── logo.svg              # genereret kopi af logo-symmetrisk.svg
 │   ├── logo.png              # genereret 1024×1024 PNG (feed-artwork)
 │   └── nginx/default.conf    # Content-Type-override for feed.xml
@@ -182,10 +186,12 @@ registreret som endpoint.
 ```bash
 scripts/deploy.sh
 scripts/deploy.sh --sync-media   # uploader også lokalt media/ til PVC
+scripts/deploy.sh --sync-ipfs    # pinner også medierne i IPFS-gatewayen
 ```
 
 Har du ændret medier, skal du bruge `--sync-media` (eller køre
-`make sync-media` bagefter). Manuelt svarer flowet til:
+`make sync-media` bagefter); skal IPFS-enclosure-URL'erne virke, kør
+`--sync-ipfs` (eller `scripts/sync-ipfs.sh` bagefter). Manuelt svarer flowet til:
 
 ```bash
 ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s
@@ -233,8 +239,12 @@ at springe over).
   kilden; `make build` genererer både SVG- og PNG-kopier til ConfigMap'en.
   Feedet bruger PNG, fordi podcast-klienter ikke afkoder SVG.
 - **IPFS i fase 2 — som ekstra sti, ikke erstatning.** Hovedkanalen forbliver
-  plain HTTPS fra nginx; IPFS bliver en anden enclosure mod egen gateway, så
-  intet afhænger af, at IPFS virker. Se dialog-notatet
+  plain HTTPS fra nginx; IPFS bliver en anden enclosure mod egen gateway
+  (`ipfs.higgs.gihc.online`), så intet afhænger af, at IPFS virker. I gang:
+  Kubo-gateway-pod i k8s (k8s/ipfs.yaml), CID-beregning i build.py
+  (`ipfs add -w` giver en stabil wrap-mappe-CID) og `scripts/sync-ipfs.sh`
+  til pinning. Tilbage: DNS-record + deploy + ipfs-cluster (CRDT) på
+  VPS + Pi + laptop som redundant backup. Se dialog-notatet
   [87a8a829-433b-41f9-90d8-c5a659e4204e.md](87a8a829-433b-41f9-90d8-c5a659e4204e.md).
 
 ## Næste skridt
@@ -242,10 +252,10 @@ at springe over).
 - Første medie-episode er live; tilføj flere poster/episoder i samme flow
   (fil i `media/` → front matter med `media:` → `scripts/deploy.sh
   --sync-media`).
-- Medie-backup-strategi: lige nu findes hver fil kun lokalt og på serverens
-  PVC.
-- Fase 2: Kubo-gateway-pod, CID-beregning i build.py, ipfs-cluster (CRDT) på
-  VPS + Pi + laptop. WebTorrent/Handshake forbliver research indtil videre.
+- Fase 2 (i gang): gateway-pod og CID'er er scaffoldet — mangler
+  DNS-record for `ipfs.higgs.gihc.online`, deploy og pinning af medierne.
+- Fase 2 (senere): ipfs-cluster (CRDT) på VPS + Pi + laptop som redundant
+  backup af medierne. WebTorrent/Handshake forbliver research indtil videre.
 - Følg med i [TODO.md](TODO.md).
 
 ## Licens
