@@ -95,9 +95,12 @@ higgs/
 ikke hører i git, det andet fordi det er et genereret artefakt. Det samme
 gælder `k8s/logo.svg` (en kopi af `logo/logo-symmetrisk.svg`).
 
-Feedets `<logo>`/`<icon>` peger på `https://higgs.gihc.online/logo.svg` — den
-symmetriske tre-lags-udgave af den håndtegnede trekivist. SVG'en er lille nok
-til at bo i ConfigMap'en sammen med feed.xml.
+Feedets `<logo>`/`<icon>` peger på `https://higgs.gihc.online/logo.png` — en
+1024×1024 PNG (hvid baggrund) af den symmetriske tre-lags-udgave af den
+håndtegnede trekivist. PNG bruges, fordi podcast-klienter (fx AntennaPod)
+ikke kan afkode SVG som artwork; selve SVG'en serveres også som
+`https://higgs.gihc.online/logo.svg` til browsere. Begge er små nok til at bo
+i ConfigMap'en sammen med feed.xml.
 
 ## Daglig brug
 

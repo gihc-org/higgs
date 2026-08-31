@@ -40,6 +40,10 @@ spec:
               mountPath: /usr/share/nginx/html/logo.svg
               subPath: logo.svg
               readOnly: true
+            - name: feed
+              mountPath: /usr/share/nginx/html/logo.png
+              subPath: logo.png
+              readOnly: true
             - name: media
               mountPath: /usr/share/nginx/html/media
       volumes:

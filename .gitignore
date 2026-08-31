@@ -1,6 +1,7 @@
 # Genereret
 k8s/feed.xml
 k8s/logo.svg
+k8s/logo.png
 __pycache__/
 *.pyc
 

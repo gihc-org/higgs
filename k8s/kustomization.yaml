@@ -12,4 +12,5 @@ configMapGenerator:
     files:
       - feed.xml
       - logo.svg
+      - logo.png
       - nginx/default.conf
