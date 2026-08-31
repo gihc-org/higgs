@@ -5,7 +5,9 @@ Et helt simpelt statisk Atom-feed, live på
 
 Status: **fase 1 i drift.** Feedet er deployet på k3s, udgiver to poster —
 inkl. den første medie-episode (m4a på PVC) — og feed, medier og logo er
-testet i en rigtig feed-læser (AntennaPod).
+testet i en rigtig feed-læser (AntennaPod). Fase 2 (IPFS) er undervejs:
+gateway deployet i klyngen og medier pinned — afventer offentlig DNS + cert
+for `ipfs.higgs.gihc.online`.
 
 ## Hvorfor findes higgs?
 
@@ -198,6 +200,14 @@ ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInter
 kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
 ```
 
+Gatewayen verificeres separat (CID'et udskrives af `sync-ipfs.sh`):
+
+```bash
+curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
+  https://ipfs.higgs.gihc.online/ipfs/<CID>/<fil>
+# forvent: HTTP 200 og fx audio/mp4
+```
+
 ### DNS (kun ved nye subdomæner)
 
 ```bash
@@ -241,10 +251,12 @@ at springe over).
 - **IPFS i fase 2 — som ekstra sti, ikke erstatning.** Hovedkanalen forbliver
   plain HTTPS fra nginx; IPFS bliver en anden enclosure mod egen gateway
   (`ipfs.higgs.gihc.online`), så intet afhænger af, at IPFS virker. I gang:
-  Kubo-gateway-pod i k8s (k8s/ipfs.yaml), CID-beregning i build.py
-  (`ipfs add -w` giver en stabil wrap-mappe-CID) og `scripts/sync-ipfs.sh`
-  til pinning. Tilbage: DNS-record + deploy + ipfs-cluster (CRDT) på
-  VPS + Pi + laptop som redundant backup. Se dialog-notatet
+  Kubo-gateway-pod i k8s (k8s/ipfs.yaml), CID-beregning i build.py (`ipfs add
+  -w` giver en stabil wrap-mappe-CID) og `scripts/sync-ipfs.sh` til pinning —
+  **deployet og medier pinned**. Åbent: offentlig DNS for
+  `ipfs.higgs.gihc.online` (recorden findes i Simplys API, men serveres ikke
+  endnu) + cert; derefter ipfs-cluster (CRDT) på VPS + Pi + laptop som
+  redundant backup. Se dialog-notatet
   [87a8a829-433b-41f9-90d8-c5a659e4204e.md](87a8a829-433b-41f9-90d8-c5a659e4204e.md).
 
 ## Næste skridt
@@ -252,8 +264,9 @@ at springe over).
 - Første medie-episode er live; tilføj flere poster/episoder i samme flow
   (fil i `media/` → front matter med `media:` → `scripts/deploy.sh
   --sync-media`).
-- Fase 2 (i gang): gateway-pod og CID'er er scaffoldet — mangler
-  DNS-record for `ipfs.higgs.gihc.online`, deploy og pinning af medierne.
+- Fase 2 (i gang): gateway og CID'er er deployet, medier pinned — mangler
+  offentlig DNS + cert for `ipfs.higgs.gihc.online` (recorden findes i
+  Simplys API, men serveres ikke endnu) og offentlig verifikation.
 - Fase 2 (senere): ipfs-cluster (CRDT) på VPS + Pi + laptop som redundant
   backup af medierne. WebTorrent/Handshake forbliver research indtil videre.
 - Følg med i [TODO.md](TODO.md).
