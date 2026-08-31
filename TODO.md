@@ -43,6 +43,8 @@
   - [ ] **Afventer brugeren**: offentlig `curl` af gateway-URL'en (DNS + cert
         verificeres fra brugerens maskine)
   - [ ] ipfs-cluster (CRDT) på VPS + Pi + laptop — redundant pinning/backup
+- [x] DNS-script: rettet quoting-bug i existing-record-snippet (record_id) —
+      `scripts/create-dns-record.sh ipfs` kører nu
 
 ## Beslutninger (foreløbige)
 

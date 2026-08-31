@@ -52,7 +52,7 @@ records = json.load(sys.stdin).get("records", [])
 name = os.environ["RECORD_NAME"]
 for r in records:
     if r.get("type") == "A" and r.get("name") == name:
-        print(f"{r.get('record_id', '')}\t{r.get('data', '')}")
+        print(str(r.get("record_id", "")) + "\t" + r.get("data", ""))
         break
 ' <<<"$RECORDS")
 
