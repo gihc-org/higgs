@@ -44,14 +44,14 @@ else
 fi
 
 echo "== kopiér media/ til pod =="
-"${KUBECTL[@]}" cp media/ "$POD:/tmp/"
+"${KUBECTL[@]}" -n higgs cp media/ "$POD:/tmp/"
 
 echo "== pin hver fil (wrap-mappe-CID) =="
 while IFS= read -r f; do
     rel="${f#media/}"
-    cid="$("${KUBECTL[@]}" exec "$POD" -- ipfs add -Q -w --cid-version 1 "/tmp/media/$rel" | tr -d '\r')"
+    cid="$("${KUBECTL[@]}" -n higgs exec "$POD" -- ipfs add -Q -w --cid-version 1 "/tmp/media/$rel" | tr -d '\r')"
     echo "$rel → $cid"
 done < <(find media -type f | sort)
 
-"${KUBECTL[@]}" exec "$POD" -- rm -rf /tmp/media
+"${KUBECTL[@]}" -n higgs exec "$POD" -- rm -rf /tmp/media
 echo "OK: medier pinned — verificér med curl -sS https://ipfs.higgs.gihc.online/ipfs/<CID>/<fil>"
