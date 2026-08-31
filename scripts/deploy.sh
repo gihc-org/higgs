@@ -67,6 +67,7 @@ ensure_tunnel
 echo "== deploy =="
 "${KUBECTL[@]}" apply -k k8s/
 "${KUBECTL[@]}" -n higgs rollout status deployment/higgs --timeout=180s
+"${KUBECTL[@]}" -n higgs rollout status deployment/ipfs-gateway --timeout=180s
 
 if [ "$SYNC_MEDIA" = 1 ]; then
     if [ -d media ] && find media -type f | grep -q .; then
