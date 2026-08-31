@@ -38,9 +38,9 @@
 - [x] kubectl installeret lokalt (v1.37.0 i `~/.local/bin`, kustomize v5.8.1)
 - [x] Deploy: SSH-tunnel → `make build` → `kubectl apply -k k8s/`
 - [ ] Verificér:
-  - [x] `curl https://higgs.gihc.online/feed.xml` → HTTP 200 + gyldigt LE-cert
-  - [x] Content-Type `application/atom+xml` (nginx-override virker)
-  - [ ] Validering i feed-læser (fx en podcatcher/feed-validator)
+- [x] `curl https://higgs.gihc.online/feed.xml` → HTTP 200 + gyldigt LE-cert
+- [x] Content-Type `application/atom+xml` (nginx-override virker)
+- [x] Validering i feed-læser — testet i AntennaPod (virker)
 
 ## Fase 2 — IPFS som ekstra sti (senere)
 
