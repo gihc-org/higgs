@@ -175,6 +175,9 @@ make verify   # tjekker feed.xml (XML) og logo.png (PNG)
 `scripts/deploy.sh` (eller `make deploy`) klarer hele flowet i ét kald: åbner
 SSH-tunnelen hvis den ikke kører, bygger, deployer, venter på rollout og
 verificerer HTTP 200 + `application/atom+xml` + titlen "Higgs".
+Verifikationen genprøver automatisk i op til ~30 sekunder: lige efter en
+`Recreate`-rollout kan ingressen kortvarigt svare 503, indtil den nye pod er
+registreret som endpoint.
 
 ```bash
 scripts/deploy.sh
@@ -215,6 +218,12 @@ at springe over).
   IP eksplicit, eller scriptet udleder den fra zonens A-records.
 - **Variant A — kun feed, ingen HTML-sider.** Det mindste der virker. Hvis der
   senere er brug for browsbare sider, er det en lille udvidelse af generatoren.
+- **Tidspunkt i `date` styrer rækkefølgen i læserne.** Feed-læsere (fx
+  AntennaPod) sorterer selv på `published`/`updated` og garanterer ikke at
+  følge XML-rækkefølgen. Uden tidspunkt får flere poster samme dag samme
+  tidsstempel (00:00Z), og læseren falder tilbage til sin egen interne
+  rækkefølge — så en ældre post kan stå øverst. Derfor: angiv altid
+  tidspunkt i `date`, når en dag kan få flere poster.
 - **Medier på PVC (i drift).** ConfigMap har en 1 MiB-grænse, så binære medier
   kan aldrig bo der. `higgs-media`-PVC'en er monteret i nginx-poden på
   `/usr/share/nginx/html/media`, og `make sync-media` uploader fra lokalt
@@ -231,8 +240,8 @@ at springe over).
 ## Næste skridt
 
 - Første medie-episode er live; tilføj flere poster/episoder i samme flow
-  (fil i `media/` → front matter med `media:` → `make build` + deploy +
-  `make sync-media`).
+  (fil i `media/` → front matter med `media:` → `scripts/deploy.sh
+  --sync-media`).
 - Medie-backup-strategi: lige nu findes hver fil kun lokalt og på serverens
   PVC.
 - Fase 2: Kubo-gateway-pod, CID-beregning i build.py, ipfs-cluster (CRDT) på
