@@ -18,8 +18,8 @@ oprindelige strategi) og `TODO.md` (status/tjekliste) før arbejde.
   (letsencrypt-prod), DNS A-record oprettet, feedet testet i AntennaPod.
 - Generator, k8s-manifester, Makefile og DNS-script er på plads; kubectl er
   installeret lokalt (`~/.local/bin`), SSH-tunnel via `hetzner-k3s`.
-- Afventer: brugeren pusher selv; beslutning om medier (indtil videre
-  tekst-only); fase 2 = IPFS som ekstra distributionssti (ikke erstatning).
+- Afventer: brugeren pusher selv; fase 2 = IPFS som ekstra distributionssti
+  (ikke erstatning). Medie-håndtering er i drift (første m4a-episode på PVC).
 
 ## Agentens rolle
 

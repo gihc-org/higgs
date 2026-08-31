@@ -3,8 +3,9 @@
 Et helt simpelt statisk Atom-feed, live på
 [https://higgs.gihc.online/feed.xml](https://higgs.gihc.online/feed.xml).
 
-Status: **fase 1 i drift.** Feedet er deployet på k3s, udgiver en post og er
-testet i en rigtig feed-læser (AntennaPod).
+Status: **fase 1 i drift.** Feedet er deployet på k3s, udgiver to poster —
+inkl. den første medie-episode (m4a på PVC) — og er testet i en rigtig
+feed-læser (AntennaPod).
 
 ## Hvorfor findes higgs?
 
@@ -82,6 +83,7 @@ higgs/
 │   ├── deployment.yaml       # nginx:alpine, mount af ConfigMap
 │   ├── service.yaml
 │   ├── ingress.yaml          # higgs.gihc.online, letsencrypt-prod
+│   ├── pvc.yaml              # higgs-media (5Gi, local-path) — medier
 │   └── nginx/default.conf    # Content-Type-override for feed.xml
 ├── STRATEGI.md               # den oprindelige strategi
 ├── TODO.md                   # status og tjekliste
@@ -158,11 +160,11 @@ og springer over, hvis recorden allerede findes.
   CNAME og ville binde hele domæneroden til projektet.)
 - **Variant A — kun feed, ingen HTML-sider.** Det mindste der virker. Hvis der
   senere er brug for browsbare sider, er det en lille udvidelse af generatoren.
-- **Tekst-only i første omgang.** Ingen PVC endnu; medie-håndteringen er
-  allerede forberedt i build.py, så den er billig at tage i brug.
-- **Medier på PVC, når de kommer.** ConfigMap har en 1 MiB-grænse, så binære
-  medier kan aldrig bo der. Planen er en `higgs-media`-PVC monteret i
-  nginx-poden + `make sync-media` til upload. Stabile stier er exit-strategien.
+- **Medier på PVC (i drift).** ConfigMap har en 1 MiB-grænse, så binære medier
+  kan aldrig bo der. `higgs-media`-PVC'en er monteret i nginx-poden på
+  `/usr/share/nginx/html/media`, og `make sync-media` uploader fra lokalt
+  `media/`. Deployment'et bruger `Recreate`, fordi PVC'en er ReadWriteOnce.
+  Stabile stier er exit-strategien.
 - **IPFS i fase 2 — som ekstra sti, ikke erstatning.** Hovedkanalen forbliver
   plain HTTPS fra nginx; IPFS bliver en anden enclosure mod egen gateway, så
   intet afhænger af, at IPFS virker. Se dialog-notatet
@@ -170,8 +172,9 @@ og springer over, hvis recorden allerede findes.
 
 ## Næste skridt
 
-- Beslut: medier nu, eller tekst-only et stykke tid endnu?
-- Når medier kommer: PVC + `sync-media` + første enclosure i praksis.
+- Første medie-episode er live; tilføj flere poster/episoder i samme flow
+  (fil i `media/` → front matter med `media:` → `make build` + deploy +
+  `make sync-media`).
 - Fase 2: Kubo-gateway-pod, CID-beregning i build.py, ipfs-cluster (CRDT) på
   VPS + Pi + laptop. WebTorrent/Handshake forbliver research indtil videre.
 - Følg med i [TODO.md](TODO.md).

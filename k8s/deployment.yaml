@@ -6,6 +6,8 @@ metadata:
     app: higgs
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: higgs
@@ -34,7 +36,12 @@ spec:
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
               readOnly: true
+            - name: media
+              mountPath: /usr/share/nginx/html/media
       volumes:
         - name: feed
           configMap:
             name: higgs-feed
+        - name: media
+          persistentVolumeClaim:
+            claimName: higgs-media

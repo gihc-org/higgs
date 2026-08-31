@@ -24,6 +24,7 @@ CONTENT_DIR = Path("content")
 OUTPUT = Path("k8s/feed.xml")  # i k8s/, fordi kustomize kun kan se filer i sin mappe
 
 MIME_BY_EXT = {
+    ".m4a": "audio/mp4",
     ".mp3": "audio/mpeg",
     ".mp4": "video/mp4",
     ".ogg": "audio/ogg",

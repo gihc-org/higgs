@@ -11,7 +11,7 @@
 - [x] Media: PVC i starten; IPFS tilføjes senere som anden sti
 - [x] Stabil URL-kontrakt: `media/<slug>/<fil>` ændres aldrig
 - [x] GitHub-remote findes allerede: `git@github.com:gihc-org/higgs.git`
-- [ ] Medier nu eller tekst-only? (antaget: tekst-only i første omgang)
+- [x] Medier: første episode live (TL;DR — Mastering Monero, m4a på PVC)
 
 ## Fase 1 — minimalt feed (nu)
 
@@ -23,7 +23,7 @@
   - [x] `deployment.yaml` — nginx:alpine, mount af ConfigMap + nginx-override for Content-Type
   - [x] `service.yaml` — port 80 → 80
   - [x] `ingress.yaml` — host `higgs.gihc.online`, `letsencrypt-prod`
-  - [ ] `pvc.yaml` — `higgs-media` (udskudt, da vi starter tekst-only)
+  - [x] `pvc.yaml` — `higgs-media` (5Gi, local-path) + mount + `Recreate`
 - [x] `build.py`:
   - [x] Front matter: `title` (påkrævet), `date` (default fra filnavn), `summary`, `external_url`, `media`
   - [x] Stabile entry-id'er: `uuid5` af slug (filnavn)
@@ -41,6 +41,7 @@
 - [x] `curl https://higgs.gihc.online/feed.xml` → HTTP 200 + gyldigt LE-cert
 - [x] Content-Type `application/atom+xml` (nginx-override virker)
 - [x] Validering i feed-læser — testet i AntennaPod (virker)
+- [x] Første medie-post: enclosure + `audio/mp4` + Range (206) verificeret
 
 ## Fase 2 — IPFS som ekstra sti (senere)
 
