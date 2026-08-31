@@ -93,7 +93,7 @@ higgs/
 │   └── 2026-08-31-foerste-post.md
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
-│   └── create-dns-record.sh  # A-record hos Simply.com (idempotent)
+│   └── create-dns-record.sh  # A-record hos Simply.com — IP som arg eller udledt fra zonen
 ├── build.py                  # generatoren: content/ → k8s/feed.xml
 ├── Makefile                  # build / verify / deploy / sync-media
 ├── k8s/                      # manifests + genererede artefakter
@@ -186,13 +186,23 @@ scripts/create-dns-record.sh [navn]   # default: higgs
 ```
 
 Kræver `pass simply/account` og `pass simply/api-key`. Scriptet er idempotent
-og springer over, hvis recorden allerede findes.
+og springer over, hvis recorden allerede har den rigtige IP.
+
+IP'en er **ikke hardcoded**. Angiv den eksplicit som andet argument
+(`scripts/create-dns-record.sh higgs 1.2.3.4`) — eller lad scriptet udlede
+den fra zonens A-records. Udledning bruges kun, hvis alle A-records er enige
+om én IP; ellers fejler scriptet med en besked i stedet for at gætte. Da alle
+subdomæner peger på samme VPS, følger `higgs` med, når IP'en er opdateret
+andre steder i zonen. Er IP'en ændret, opdateres recorden (PUT i stedet for
+at springe over).
 
 ## Beslutninger og begrundelser
 
 - **Subdomæne frem for apex.** `higgs.gihc.online` holder apex `gihc.online`
   frit, og et evt. host-skift er én A-record. (Ved apex kan man ikke bruge
-  CNAME og ville binde hele domæneroden til projektet.)
+  CNAME og ville binde hele domæneroden til projektet.) DNS-scriptet
+  hardcoder ikke IP'en: efter et maskin-skift på VPS'en angiver man den nye
+  IP eksplicit, eller scriptet udleder den fra zonens A-records.
 - **Variant A — kun feed, ingen HTML-sider.** Det mindste der virker. Hvis der
   senere er brug for browsbare sider, er det en lille udvidelse af generatoren.
 - **Medier på PVC (i drift).** ConfigMap har en 1 MiB-grænse, så binære medier

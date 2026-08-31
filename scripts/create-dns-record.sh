@@ -1,18 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Opretter A-record for higgs.gihc.online hos Simply.com, så higgs kan nås på
-# k3s-clusteret. Idempotent — springer over hvis recorden findes.
+# Sikrer en A-record for <navn>.gihc.online hos Simply.com mod VPS'ens
+# nuværende IP. IP'en er IKKE hardcoded:
+#   1) angives eksplicit som andet argument, eller
+#   2) udledes fra zonens A-records — er de alle enige om én IP, bruges den
+#      (alle subdomæner peger i praksis på samme VPS).
+# Er records i uenighed, fejler scriptet og beder om IP'en — den gætter aldrig.
+# Idempotent: opretter hvis recorden mangler, opdaterer hvis IP'en er ændret,
+# springer over hvis den allerede er korrekt.
 #
 # Credentials hentes fra `pass`:
 #   pass insert simply/account
 #   pass insert simply/api-key
 #
-# Brug: scripts/create-dns-record.sh [record-navn]  (default: higgs)
+# Brug: scripts/create-dns-record.sh [record-navn] [ip]
+#   record-navn: default "higgs"
+#   ip: optional — ellers udledt fra zonens A-records (krav: alle enige)
 
 DOMAIN="gihc.online"
 RECORD_NAME="${1:-higgs}"
-VPS_IP="65.109.233.92"
+TARGET_IP="${2:-}"
+TTL=3600
 
 SIMPLY_ACCOUNT="$(pass simply/account)"
 SIMPLY_API_KEY="$(pass simply/api-key)"
@@ -22,23 +31,53 @@ API_URL="https://api.simply.com/2/my/products/${DOMAIN}/dns/records/"
 echo "==> Henter DNS records for ${DOMAIN}..."
 RECORDS=$(curl -sf -u "${SIMPLY_ACCOUNT}:${SIMPLY_API_KEY}" "${API_URL}")
 
-EXISTS=$(RECORD_NAME="$RECORD_NAME" python3 -c '
+if [ -z "$TARGET_IP" ]; then
+    TARGET_IP=$(python3 -c '
+import json, sys
+records = json.load(sys.stdin).get("records", [])
+ips = {r.get("data") for r in records if r.get("type") == "A" and r.get("data")}
+if len(ips) == 1:
+    print(next(iter(ips)))
+' <<<"$RECORDS")
+fi
+
+if [ -z "$TARGET_IP" ]; then
+    echo "Fejl: kunne ikke udlede VPS-IP'en fra zonens A-records (uenige eller manglende). Angiv den eksplicit: $0 ${RECORD_NAME} <ip>" >&2
+    exit 1
+fi
+
+EXISTING=$(RECORD_NAME="$RECORD_NAME" python3 -c '
 import json, os, sys
 records = json.load(sys.stdin).get("records", [])
 name = os.environ["RECORD_NAME"]
-print("yes" if any(r.get("type") == "A" and r.get("name") == name for r in records) else "no")
+for r in records:
+    if r.get("type") == "A" and r.get("name") == name:
+        print(f"{r.get('record_id', '')}\t{r.get('data', '')}")
+        break
 ' <<<"$RECORDS")
 
-if [ "$EXISTS" = "yes" ]; then
-    echo "==> A-record for ${RECORD_NAME}.${DOMAIN} findes allerede, springer over."
+EXISTING_ID="${EXISTING%%$'\t'*}"
+EXISTING_IP="${EXISTING#*$'\t'}"
+
+if [ -n "$EXISTING_ID" ] && [ "$EXISTING_IP" = "$TARGET_IP" ]; then
+    echo "==> A-record for ${RECORD_NAME}.${DOMAIN} peger allerede på ${TARGET_IP}, springer over."
     exit 0
 fi
 
-echo "==> Opretter A-record ${RECORD_NAME}.${DOMAIN} -> ${VPS_IP}..."
-curl -sf -u "${SIMPLY_ACCOUNT}:${SIMPLY_API_KEY}" \
-    -X POST "${API_URL}" \
-    -H "Content-Type: application/json" \
-    -d "{\"type\":\"A\",\"name\":\"${RECORD_NAME}\",\"data\":\"${VPS_IP}\",\"ttl\":3600}" \
-    -o /dev/null
+BODY="{\"type\":\"A\",\"name\":\"${RECORD_NAME}\",\"data\":\"${TARGET_IP}\",\"ttl\":${TTL}}"
 
-echo "==> Oprettet."
+if [ -z "$EXISTING_ID" ]; then
+    echo "==> Opretter A-record ${RECORD_NAME}.${DOMAIN} -> ${TARGET_IP}..."
+    curl -sf -u "${SIMPLY_ACCOUNT}:${SIMPLY_API_KEY}" \
+        -X POST "${API_URL}" \
+        -H "Content-Type: application/json" \
+        -d "$BODY" -o /dev/null
+else
+    echo "==> Opdaterer A-record ${RECORD_NAME}.${DOMAIN} -> ${TARGET_IP} (var ${EXISTING_IP})..."
+    curl -sf -u "${SIMPLY_ACCOUNT}:${SIMPLY_API_KEY}" \
+        -X PUT "${API_URL}${EXISTING_ID}" \
+        -H "Content-Type: application/json" \
+        -d "$BODY" -o /dev/null
+fi
+
+echo "==> Klar."

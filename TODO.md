@@ -12,6 +12,8 @@
 - [x] Stabil URL-kontrakt: `media/<slug>/<fil>` ændres aldrig
 - [x] GitHub-remote findes allerede: `git@github.com:gihc-org/higgs.git`
 - [x] Medier: første episode live (TL;DR — Mastering Monero, m4a på PVC)
+- [x] VPS-IP er ikke statisk: DNS-scriptet hardcoder ikke IP — den angives
+      eksplicit eller udledes fra zonens A-records; recorden opdateres ved ændring
 
 ## Fase 1 — minimalt feed (nu)
 
@@ -33,7 +35,7 @@
   - [x] Én konstant for feed-base-URL (neutralitets-anker)
 - [x] `Makefile`: `build`, `verify`, `deploy`, `sync-media`
 - [x] `content/` med første post (kladde)
-- [x] DNS-script: `scripts/create-dns-record.sh` (klar til kørsel)
+- [x] DNS-script: `scripts/create-dns-record.sh` (ingen hardcoded IP; opret/opdater/skip)
 - [x] DNS: A-record for `higgs.gihc.online` oprettet
 - [x] kubectl installeret lokalt (v1.37.0 i `~/.local/bin`, kustomize v5.8.1)
 - [x] Deploy: SSH-tunnel → `make build` → `kubectl apply -k k8s/`
