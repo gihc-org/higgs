@@ -13,8 +13,8 @@
 > [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
 > push overlades til brugeren. Kontekst: higgs fase 1 er i drift — statisk
 > Atom-feed på https://higgs.gihc.online/feed.xml med to poster inkl. første
-> medie-episode (m4a på PVC). Seneste commit (tidsstempler i front matter +
-> feed-titel "Higgs") afventer brugerens push. Mål i denne session:
+> medie-episode (m4a på PVC). Fase 1 er fuldt deployet og pushet til GitHub.
+> Mål i denne session:
 > <indsæt mål>."
 
 ## Session 2026-08-31 (aften)
@@ -47,7 +47,7 @@
 ## Fase 1 — minimalt feed (nu)
 
 - [x] `.gitignore` med `media/`
-- [ ] Push til GitHub (brugeren pusher selv)
+- [x] Push til GitHub (brugeren pusher selv)
 - [x] Scaffold `k8s/`:
   - [x] `namespace.yaml` (namespace: higgs)
   - [x] `kustomization.yaml` med `configMapGenerator` for feed.xml (content-hash)
