@@ -26,14 +26,14 @@ POD="$("${KUBECTL[@]}" -n higgs get pod -l app=ipfs-gateway -o jsonpath='{.items
 [ -n "$POD" ] || { echo "FEJL: ingen ipfs-gateway-pod (er gatewayen deployet?)" >&2; exit 1; }
 
 echo "== kopiér media/ til pod =="
-"${KUBECTL[@]}" cp media/ "higgs/$POD:/tmp/"
+"${KUBECTL[@]}" cp media/ "$POD:/tmp/"
 
 echo "== pin hver fil (wrap-mappe-CID) =="
 while IFS= read -r f; do
     rel="${f#media/}"
-    cid="$("${KUBECTL[@]}" exec "higgs/$POD" -- ipfs add -Q -w --cid-version 1 "/tmp/media/$rel" | tr -d '\r')"
+    cid="$("${KUBECTL[@]}" exec "$POD" -- ipfs add -Q -w --cid-version 1 "/tmp/media/$rel" | tr -d '\r')"
     echo "$rel → $cid"
 done < <(find media -type f | sort)
 
-"${KUBECTL[@]}" exec "higgs/$POD" -- rm -rf /tmp/media
+"${KUBECTL[@]}" exec "$POD" -- rm -rf /tmp/media
 echo "OK: medier pinned — verificér med curl -sS https://ipfs.higgs.gihc.online/ipfs/<CID>/<fil>"
