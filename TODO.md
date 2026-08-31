@@ -34,13 +34,13 @@
 - [x] `Makefile`: `build`, `verify`, `deploy`, `sync-media`
 - [x] `content/` med første post (kladde)
 - [x] DNS-script: `scripts/create-dns-record.sh` (klar til kørsel)
-- [ ] DNS: A-record for `higgs.gihc.online` (kør scriptet — kræver `pass simply/…`)
+- [x] DNS: A-record for `higgs.gihc.online` oprettet
 - [x] kubectl installeret lokalt (v1.37.0 i `~/.local/bin`, kustomize v5.8.1)
-- [ ] Deploy: SSH-tunnel → `make build` → `kubectl apply -k k8s/`
+- [x] Deploy: SSH-tunnel → `make build` → `kubectl apply -k k8s/`
 - [ ] Verificér:
-  - [ ] `curl https://higgs.gihc.online/feed.xml` → gyldigt LE-cert
-  - [ ] Content-Type `application/atom+xml` (nginx-override eller `.atom`-filnavn)
-  - [ ] Validering i feed-læser
+  - [x] `curl https://higgs.gihc.online/feed.xml` → HTTP 200 + gyldigt LE-cert
+  - [x] Content-Type `application/atom+xml` (nginx-override virker)
+  - [ ] Validering i feed-læser (fx en podcatcher/feed-validator)
 
 ## Fase 2 — IPFS som ekstra sti (senere)
 
