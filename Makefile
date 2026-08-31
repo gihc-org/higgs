@@ -2,6 +2,7 @@
 
 build:
 	python3 build.py
+	cp logo/logo-symmetrisk.svg k8s/logo.svg
 
 verify: build
 	python3 -c "import xml.etree.ElementTree as ET; ET.parse('k8s/feed.xml'); print('feed.xml: gyldig XML')"

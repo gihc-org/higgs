@@ -17,6 +17,7 @@ import markdown
 # ---------------------------------------------------------------------------
 FEED_BASE = "https://higgs.gihc.online"
 FEED_PATH = "/feed.xml"
+FEED_LOGO = FEED_BASE + "/logo.svg"
 FEED_TITLE = "higgs"
 FEED_AUTHOR = "Kristian Nygaard Jensen"
 
@@ -159,6 +160,8 @@ def build_feed(posts: list[Post]) -> str:
         f"  <id>{escape(FEED_BASE + '/')}</id>",
         f"  <updated>{rfc3339(updated)}</updated>",
         f'  <link rel="self" href={quoteattr(FEED_BASE + FEED_PATH)}/>',
+        f"  <logo>{escape(FEED_LOGO)}</logo>",
+        f"  <icon>{escape(FEED_LOGO)}</icon>",
         f"  <author><name>{escape(FEED_AUTHOR)}</name></author>",
     ]
     for p in posts:

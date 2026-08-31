@@ -11,4 +11,5 @@ configMapGenerator:
   - name: higgs-feed
     files:
       - feed.xml
+      - logo.svg
       - nginx/default.conf

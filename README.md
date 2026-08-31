@@ -80,10 +80,11 @@ higgs/
 ├── Makefile                  # build / verify / deploy / sync-media
 ├── k8s/                      # manifests + genereret feed.xml
 │   ├── kustomization.yaml    # configMapGenerator: feed.xml + nginx-override
-│   ├── deployment.yaml       # nginx:alpine, mount af ConfigMap
+│   ├── deployment.yaml       # nginx:alpine, mount af ConfigMap (feed + logo)
 │   ├── service.yaml
 │   ├── ingress.yaml          # higgs.gihc.online, letsencrypt-prod
 │   ├── pvc.yaml              # higgs-media (5Gi, local-path) — medier
+│   ├── logo.svg              # genereret kopi af logo-symmetrisk.svg
 │   └── nginx/default.conf    # Content-Type-override for feed.xml
 ├── STRATEGI.md               # den oprindelige strategi
 ├── TODO.md                   # status og tjekliste
@@ -91,7 +92,12 @@ higgs/
 ```
 
 `media/` og `k8s/feed.xml` er gitignoreret — det første fordi binære medier
-ikke hører i git, det andet fordi det er et genereret artefakt.
+ikke hører i git, det andet fordi det er et genereret artefakt. Det samme
+gælder `k8s/logo.svg` (en kopi af `logo/logo-symmetrisk.svg`).
+
+Feedets `<logo>`/`<icon>` peger på `https://higgs.gihc.online/logo.svg` — den
+symmetriske tre-lags-udgave af den håndtegnede trekivist. SVG'en er lille nok
+til at bo i ConfigMap'en sammen med feed.xml.
 
 ## Daglig brug
 
