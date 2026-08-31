@@ -51,6 +51,23 @@ content/*.md  →  build.py  →  k8s/feed.xml  →  ConfigMap (kustomize)
 Platformen er k3s på en Hetzner-VPS med infra i `../infra/`-repoet. higgs
 ejer sine egne k8s-manifester og kræver ingen ændringer i infra-repoet.
 
+### Hvad er Kustomize?
+
+Kustomize er Kubernetes' indbyggede værktøj til at samle og tilpasse
+YAML-manifests — uden skabeloner eller et separat sprog. Man skriver
+almindelig YAML, og `kustomization.yaml` beskriver, hvordan filerne skal
+sættes sammen. `kubectl apply -k k8s/` (flaget `-k`) kører kustomize
+automatisk.
+
+I higgs bruger vi to af dets egenskaber:
+
+- `namespace: higgs` sættes ét sted og tilføjes til alle ressourcer.
+- `configMapGenerator` bygger ConfigMap'en af `feed.xml`, `logo.svg`,
+  `logo.png` og `nginx/default.conf` og giver den et content-hash i navnet
+  (fx `higgs-feed-mtg2mkfg6b`). Ændrer en fil sig, får ConfigMap'en nyt navn →
+  deployment'et peger på det nye navn → pod'en genstarter atomisk. Det er
+  derfor, en ny post kun kræver `make build` + `kubectl apply -k k8s/`.
+
 ## Neutralitets-ankrene
 
 Tre principper blev lagt ind fra dag ét, fordi de er billige nu og svære at
