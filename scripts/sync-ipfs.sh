@@ -22,8 +22,26 @@ if ! find media -type f 2>/dev/null | grep -q .; then
     exit 0
 fi
 
-POD="$("${KUBECTL[@]}" -n higgs get pod -l app=ipfs-gateway -o jsonpath='{.items[0].metadata.name}')"
-[ -n "$POD" ] || { echo "FEJL: ingen ipfs-gateway-pod (er gatewayen deployet?)" >&2; exit 1; }
+echo "== vent på gateway-rollout =="
+"${KUBECTL[@]}" -n higgs rollout status deployment/ipfs-gateway --timeout=120s
+
+# Hent pod-navnet og bekræft, at den er Ready — en Recreate-rollout kan lige
+# have skiftet pod, og så må vi ikke ramme en forældet/ikke-eksisterende pod.
+POD=""
+READY=""
+for _ in 1 2 3 4 5; do
+    POD="$("${KUBECTL[@]}" -n higgs get pod -l app=ipfs-gateway -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)"
+    [ -n "$POD" ] || { sleep 2; continue; }
+    READY="$("${KUBECTL[@]}" -n higgs get pod "$POD" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || true)"
+    [ "$READY" = "True" ] && break
+    sleep 2
+done
+if [ -n "$POD" ] && [ "$READY" = "True" ]; then
+    :
+else
+    echo "FEJL: ingen klar ipfs-gateway-pod (er gatewayen deployet?)" >&2
+    exit 1
+fi
 
 echo "== kopiér media/ til pod =="
 "${KUBECTL[@]}" cp media/ "$POD:/tmp/"
