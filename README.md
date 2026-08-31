@@ -143,6 +143,11 @@ summary: En kort beskrivelse
 Brødteksten. **Markdown** bliver til HTML i feedet.
 ```
 
+`date` er valgfri og kan indeholde et tidspunkt (RFC 3339, fx
+`2026-08-31T18:05:00+02:00`). Uden `date` bruges filnavnets dato kl. 00:00Z.
+Tidspunktet styrer `published`/`updated` og sorteringen (nyeste først) — så
+flere poster samme dag får en entydig rækkefølge i feed-læsere.
+
 Med medier tilføjes en `media:`-liste:
 
 ```markdown

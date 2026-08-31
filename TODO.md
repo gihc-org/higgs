@@ -13,9 +13,8 @@
 > [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
 > push overlades til brugeren. Kontekst: higgs fase 1 er i drift — statisk
 > Atom-feed på https://higgs.gihc.online/feed.xml med to poster inkl. første
-> medie-episode (m4a på PVC). Seneste commit 4d15a33 (Feed-titel: Higgs;
-> TODO om AntennaPod-rækkefølge) afventer brugerens push + deploy. Mål i
-> denne session:
+> medie-episode (m4a på PVC). Seneste commit (tidsstempler i front matter +
+> feed-titel "Higgs") afventer brugerens push + deploy. Mål i denne session:
 > <indsæt mål>."
 
 ## Session 2026-08-31 (aften)
@@ -26,8 +25,9 @@
       har samme tidsstempel (`2026-08-31T00:00:00Z`); AntennaPod sorterer selv
       på pubDate og falder tilbage til appens interne DB-rækkefølge ved lige
       datoer — feed-XML'en har selv korrekt rækkefølge (monero først)
-- [ ] Afventer brugeren: skal posternes rækkefølge styres eksplicit (fx tid
-      i front matter), eller er AntennaPods rækkefølge ok?
+- [x] Rækkefølge styres nu eksplicit: build.py understøtter tidspunkt i
+      `date` (RFC 3339), og begge poster har fået reelle tider
+      (Hej verden 17:46, monero 18:05, +02:00) — **afventer deploy**
 
 ## Beslutninger (foreløbige)
 

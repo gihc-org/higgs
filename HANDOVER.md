@@ -23,9 +23,9 @@ medie-episode (m4a på PVC), og feed, medier og logo er testet i AntennaPod.
 
 ## Git-tilstand
 
-- Lokal `trunk` ligger én commit foran `origin/trunk`: `4d15a33`
-  ("Feed-titel: Higgs med stort H + TODO om AntennaPod-rækkefølge").
-  Den afventer brugerens push + deploy (ny feed-titel).
+- Lokal `trunk` kan ligge foran `origin/trunk` — seneste commit omhandler
+  tidsstempler i front matter + feed-titel "Higgs". Den afventer brugerens
+  push + deploy.
 - `TODO.pdf` er untracked og med vilje ikke committet (forældes hurtigt).
 - Media ligger aldrig i git (`.gitignore`); kun lokalt + på PVC.
 
@@ -77,8 +77,8 @@ medie-episode (m4a på PVC), og feed, medier og logo er testet i AntennaPod.
 
 ## Naturlige næste skridt
 
-- Brugeren skal pushe `4d15a33` (og evt. denne fil + TODO-opdatering)
-  samt deploye, så feedet hedder "Higgs".
+- Brugeren skal pushe de lokale commits (og evt. denne fil + TODO-opdatering)
+  samt deploye, så feedet hedder "Higgs" med tidsstemplede poster.
 - Flere poster/episoder i samme flow (se deploy-opsætning ovenfor).
 - Fase 2: IPFS som ekstra sti (TODO.md har listen).
 - Overblik-projektet ligger uden for dette repo:

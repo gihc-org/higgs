@@ -40,7 +40,7 @@ MIME_BY_EXT = {
 class Post:
     slug: str
     title: str
-    date: dt.date
+    published: dt.datetime
     summary: str
     external_url: str | None
     content_html: str
@@ -91,18 +91,22 @@ def _parse_meta(fm: str) -> dict:
     return meta
 
 
-def post_date(meta: dict, slug: str) -> dt.date:
+def post_datetime(meta: dict, slug: str) -> dt.datetime:
     if meta.get("date"):
         try:
-            return dt.date.fromisoformat(meta["date"])
+            published = dt.datetime.fromisoformat(meta["date"])
         except ValueError:
             raise ValueError(f"{slug}: ugyldig dato i front matter: {meta['date']!r}")
+        if published.tzinfo is None:
+            published = published.replace(tzinfo=dt.timezone.utc)
+        return published
     m = re.match(r"^(\d{4}-\d{2}-\d{2})-", slug)
     if m:
-        return dt.date.fromisoformat(m.group(1))
+        d = dt.date.fromisoformat(m.group(1))
+        return dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc)
     raise ValueError(
         f"{slug}: ingen dato — filnavnet skal starte med YYYY-MM-DD "
-        "eller have 'date' i front matter"
+        "eller have 'date' (evt. med tidspunkt) i front matter"
     )
 
 
@@ -136,23 +140,24 @@ def load_posts() -> list[Post]:
             Post(
                 slug=slug,
                 title=meta.get("title") or slug,
-                date=post_date(meta, slug),
+                published=post_datetime(meta, slug),
                 summary=meta.get("summary", ""),
                 external_url=meta.get("external_url") or None,
                 content_html=markdown.markdown(body) if body else "",
                 enclosures=build_enclosures(meta, slug),
             )
         )
-    posts.sort(key=lambda p: (p.date, p.slug), reverse=True)
+    posts.sort(key=lambda p: (p.published, p.slug), reverse=True)
     return posts
 
 
-def rfc3339(d: dt.date) -> str:
-    return d.isoformat() + "T00:00:00Z"
+def rfc3339(d: dt.datetime) -> str:
+    s = d.isoformat()
+    return s.replace("+00:00", "Z") if d.utcoffset() == dt.timedelta(0) else s
 
 
 def build_feed(posts: list[Post]) -> str:
-    updated = max((p.date for p in posts), default=dt.date.today())
+    updated = max((p.published for p in posts), default=dt.datetime.now(dt.timezone.utc))
     lines = [
         '<?xml version="1.0" encoding="utf-8"?>',
         '<feed xmlns="http://www.w3.org/2005/Atom">',
@@ -168,8 +173,8 @@ def build_feed(posts: list[Post]) -> str:
         lines.append("  <entry>")
         lines.append(f"    <title>{escape(p.title)}</title>")
         lines.append(f"    <id>urn:uuid:{p.entry_id}</id>")
-        lines.append(f"    <updated>{rfc3339(p.date)}</updated>")
-        lines.append(f"    <published>{rfc3339(p.date)}</published>")
+        lines.append(f"    <updated>{rfc3339(p.published)}</updated>")
+        lines.append(f"    <published>{rfc3339(p.published)}</published>")
         if p.summary:
             lines.append(f'    <summary type="html">{escape(markdown.markdown(p.summary))}</summary>')
         if p.external_url:

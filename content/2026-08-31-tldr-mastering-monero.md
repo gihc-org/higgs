@@ -1,5 +1,6 @@
 ---
 title: TL;DR — Mastering Monero (pilot)
+date: 2026-08-31T18:05:00+02:00
 summary: Der findes en fremragende bog om Monero. Den er gratis, open source og oversat til flere sprog — de fleste har bare ikke læst den.
 media:
   - src: media/2026-08-31-tldr-mastering-monero/episode.m4a
