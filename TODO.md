@@ -13,8 +13,10 @@
 > [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
 > push overlades til brugeren. Kontekst: higgs fase 1 er i drift — statisk
 > Atom-feed på https://higgs.gihc.online/feed.xml med to poster inkl. første
-> medie-episode (m4a på PVC). Fase 1 er fuldt deployet og pushet til GitHub.
-> Mål i denne session:
+> medie-episode. Fase 2 (IPFS) er bygget og deployet internt: Kubo-gateway i
+> k3s, medier pinned, feedet indeholder IPFS-enclosure — men
+> ipfs.higgs.gihc.online er ikke offentligt nåelig endnu (DNS-blokering, se
+> HANDOVER). Mål i denne session:
 > <indsæt mål>."
 
 ## Session 2026-08-31 (aften)
@@ -40,11 +42,15 @@
   - [x] `scripts/sync-ipfs.sh`: pin media/ i gateway-pod'en (samme CIDs)
   - [x] **Deployet**: gateway kører, medier pinned (CID matcher build.py),
         live feed indeholder IPFS-enclosure
-  - [ ] **Afventer brugeren**: offentlig `curl` af gateway-URL'en (DNS + cert
-        verificeres fra brugerens maskine)
+  - [ ] **Blokeret (DNS)**: `ipfs.higgs.gihc.online` findes i Simplys API,
+        men serveres ikke af de autoritative nameservere — aktivér i Simplys
+        UI eller slet+genopret via script; derefter cert-manager + offentlig
+        curl af gateway-URL'en
   - [ ] ipfs-cluster (CRDT) på VPS + Pi + laptop — redundant pinning/backup
 - [x] DNS-script: rettet quoting-bug i existing-record-snippet (record_id) —
       `scripts/create-dns-record.sh ipfs` kører nu
+- [x] HANDOVER + TODO-start-prompt opdateret til næste session (2026-08-31
+      aften)
 
 ## Beslutninger (foreløbige)
 
