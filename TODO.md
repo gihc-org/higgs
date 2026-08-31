@@ -42,6 +42,7 @@
 - [x] Content-Type `application/atom+xml` (nginx-override virker)
 - [x] Validering i feed-læser — testet i AntennaPod (virker)
 - [x] Første medie-post: enclosure + `audio/mp4` + Range (206) verificeret
+- [x] Feed-logo (PNG af logo-symmetrisk) verificeret i AntennaPod
 
 ## Fase 2 — IPFS som ekstra sti (senere)
 
