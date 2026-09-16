@@ -15,7 +15,7 @@
 - ingress-nginx (ServiceLB på 80/443) + globale security headers via ConfigMap i `tofu/platform.tf`
 - cert-manager med `ClusterIssuer`s: `letsencrypt-prod` og `letsencrypt-staging`
 - k3s API kun via SSH-tunnel:
-  `ssh -L 6443:localhost:6443 -N -f root@65.109.233.92` — `infra/kubeconfig.yml` peger på `127.0.0.1:6443`
+  `ssh -L 6443:localhost:6443 -N -f root@65.109.233.92` — kubeconfig (`~/.kube/gihc.yml`) peger på `127.0.0.1:6443`
 - `local-path-provisioner` (dynamiske PVC'er) + daglige Hetzner-disk-backups
 - DNS hos Simply.com — apex peger allerede på serveren; nye subdomæner via script
   (mønster fra capture: `scripts/create-dns-record.sh`, creds i `pass simply/…`)
@@ -92,7 +92,8 @@ media:
 
 ```bash
 make build   # content/ → feed.xml
-kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
+export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/gihc.yml}"
+kubectl apply -k k8s/
 make sync-media   # kun hvis medier: kubectl cp media/ → pod
 ```
 

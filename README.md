@@ -197,7 +197,8 @@ Har du ændret medier, skal du bruge `--sync-media` (eller køre
 
 ```bash
 ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s
-kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/
+export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/gihc.yml}"   # skrives af infra's ansible-playbook
+kubectl apply -k k8s/
 ```
 
 Gatewayen verificeres separat (CID'et udskrives af `sync-ipfs.sh`):

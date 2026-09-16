@@ -15,7 +15,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-KUBECTL=(kubectl --kubeconfig ../infra/kubeconfig.yml)
+# Kubeconfig ligger uden for alle repos (skrives af infra's ansible-playbook).
+KUBECONFIG="${KUBECONFIG:-$HOME/.kube/gihc.yml}"
+export KUBECONFIG
+KUBECTL=(kubectl)
 
 if ! find media -type f 2>/dev/null | grep -q .; then
     echo "intet i media/ — intet at pinne"

@@ -45,8 +45,9 @@ beskyt de tre neutralitets-ankre:
 - **Kustomize kan ikke se uden for `k8s/`** — derfor genereres `feed.xml` ind
   i `k8s/` og er gitignoreret som artefakt.
 - **Deploy kræver tunnel + byg:** `make build`, derefter
-  `kubectl --kubeconfig ../infra/kubeconfig.yml apply -k k8s/`. Verificér altid
-  efter deploy: HTTP 200, `Content-Type: application/atom+xml`, gyldigt
+  `kubectl apply -k k8s/` (kubeconfig ligger uden for repoet, i
+  `~/.kube/gihc.yml` — se `scripts/deploy.sh`). Verificér altid efter deploy:
+  HTTP 200, `Content-Type: application/atom+xml`, gyldigt
   letsencrypt-cert (`curl -sS https://higgs.gihc.online/feed.xml`).
 - **Eksterne skridt med brugerens credentials** (pass, SSH-passphrase,
   GitHub-push, DNS-ændringer): udføres af brugeren eller med eksplicit

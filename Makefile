@@ -1,5 +1,10 @@
 .PHONY: build verify deploy sync-media
 
+# Kubeconfig ligger uden for alle repos (skrives af infra's ansible-playbook).
+# Overstyr med KUBECONFIG=... hvis du har den et andet sted.
+KUBECONFIG ?= $(HOME)/.kube/gihc.yml
+export KUBECONFIG
+
 build:
 	python3 build.py
 	cp logo/logo-symmetrisk.svg k8s/logo.svg
@@ -13,5 +18,5 @@ deploy:
 	bash scripts/deploy.sh
 
 sync-media:
-	POD=$$(kubectl --kubeconfig ../infra/kubeconfig.yml -n higgs get pod -l app=higgs -o jsonpath='{.items[0].metadata.name}'); \
-	kubectl --kubeconfig ../infra/kubeconfig.yml cp media/ higgs/$$POD:/usr/share/nginx/html/
+	POD=$$(kubectl -n higgs get pod -l app=higgs -o jsonpath='{.items[0].metadata.name}'); \
+	kubectl cp media/ higgs/$$POD:/usr/share/nginx/html/

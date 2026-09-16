@@ -13,8 +13,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-KUBECONFIG_PATH="../infra/kubeconfig.yml"
-KUBECTL=(kubectl --kubeconfig "$KUBECONFIG_PATH")
+# Kubeconfig ligger uden for alle repos (skrives af infra's ansible-playbook).
+KUBECONFIG="${KUBECONFIG:-$HOME/.kube/gihc.yml}"
+export KUBECONFIG
+KUBECTL=(kubectl)
 TUNNEL_CMD=(ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes \
     -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s)
 FEED_URL="https://higgs.gihc.online/feed.xml"
@@ -33,7 +35,7 @@ done
 for tool in kubectl curl make; do
     command -v "$tool" >/dev/null || { echo "FEJL: $tool mangler i PATH" >&2; exit 1; }
 done
-[ -f "$KUBECONFIG_PATH" ] || { echo "FEJL: mangler $KUBECONFIG_PATH (infra-repo)" >&2; exit 1; }
+[ -f "$KUBECONFIG" ] || { echo "FEJL: mangler $KUBECONFIG — kør infra/ansible/infra.yml" >&2; exit 1; }
 
 port_open() {
     timeout 3 bash -c 'exec 3<>/dev/tcp/127.0.0.1/6443' 2>/dev/null

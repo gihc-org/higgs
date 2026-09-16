@@ -81,8 +81,8 @@ forbliver nginx over HTTPS. Se dialog-notatet
 - Cluster: k3s, én node på Hetzner VPS. Offentlig IP `65.109.233.92` —
   **IP er ikke statisk**; maskinen kan slettes/genskabes (derfor er IP'en
   ikke hardcoded nogen steder).
-- kubeconfig: `../infra/kubeconfig.yml` peger på `127.0.0.1:6443` — kræver
-  åben SSH-tunnel:
+- kubeconfig: `~/.kube/gihc.yml` (uden for alle repos, skrevet af infra's
+  ansible-playbook) peger på `127.0.0.1:6443` — kræver åben SSH-tunnel:
   `ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s`
   (tunnelen kan hænge — genstart ved fejl).
 - Alt-i-ét: `scripts/deploy.sh [--sync-media] [--sync-ipfs]` (tunnel + byg +
