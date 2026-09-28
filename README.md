@@ -96,11 +96,22 @@ Bøger grupperes i temaer via URL-stien — `tao` er temaet, `lieh-tzu` er bogen
 | Higgs (rod) | genereret Atom | `https://higgs.gihc.online/feed.xml` |
 | Lieh-Tzu | genereret Atom | `https://higgs.gihc.online/tao/lieh-tzu/feed.xml` |
 | The Sayings of Lao Tzu | genereret Atom | `https://higgs.gihc.online/tao/sayings-of-lao-tzu/feed.xml` |
+| Musings of a Chinese Mystic | genereret Atom | `https://higgs.gihc.online/tao/musings-of-a-chinese-mystic/feed.xml` |
 
-De to tao-bøger er importeret med `scripts/import-librivox.py` og har
-selv-hostede medier på PVC'en. Begge er Lionel Giles-oversættelser (samme
-ophavsretsnuance: PD i USA, beskyttet i DK/EU til og med 2028) og linker til
-deres kapitler på Wikisource i den form AntennaPod kan gøre klikbar.
+De tre tao-bøger er importeret med `scripts/import-librivox.py` og har
+selv-hostede medier på PVC'en. Lieh-Tzu og Sayings of Lao Tzu er Lionel
+Giles-oversættelser og linker til deres kapitler på Wikisource i den form
+AntennaPod kan gøre klikbar — PD i USA, men beskyttet i DK/EU til og med 2028
+(Giles d. 1958).
+
+**Musings of a Chinese Mystic** (1906) har en anden ophavsretsnuance: det er
+Lionel Giles' udvalg af **H. A. Giles'** oversættelse fra 1889, så selve
+tekstgrundlaget er frit i DK/EU (H. A. Giles d. 1935), mens indledningen er
+beskyttet til og med 2028. Udvalget *omgrupperer* 1889-udgavens kapitler, og
+der findes ingen fri, kapitelinddelt tekst af denne bog (Wikisource har den
+ikke; Gutenberg har 1889-udgaven som e-bog 59709 med en anden inddeling).
+Derfor er linket på bogniveau — 1906-scanningen på archive.org — både som
+`external_url` og som synlig URL i beskrivelsen.
 
 Lieh-Tzu er født som et vedhæftet RSS-feed (rettet LibriVox-fil), men er nu et
 genereret Atom-feed med **selv-hostede medier**: de otte kapitler ligger på

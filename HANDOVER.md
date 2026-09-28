@@ -38,14 +38,12 @@ upåvirkede.
 
 ## Git-tilstand
 
-- Fase 1-commits (`4d15a33`, `2bf61d9`) er pushet. Siden da ligger
-  `cff57ca` → `154c44a` (fase 2 + alle rettelser) lokalt og afventer
-  brugerens push.
-- Fase 3 (flere feeds) ligger på branch `feat/flere-feeds` oven på `trunk`:
-  pushet til `origin/feat/flere-feeds`, 9 commits foran `trunk` og intet
-  bagud — altså en ren fast-forward merge, som brugeren laver.
-- Merge + push er brugerens; derefter er `trunk` den gældende gren og
-  `feat/flere-feeds` kan slettes.
+- **Alt er merget og pushet**: `trunk` = `origin/trunk` (per 2026-09-28), og
+  fase 1-, 2- og 3-commits (bl.a. `4d15a33`, `cff57ca`, `154c44a`, `ec82c95`)
+  er alle forfædre til `trunk`. `feat/flere-feeds` blev merget fast-forward og
+  er nu bagud `trunk` — den kan slettes.
+- `trunk` er den gældende gren. Nye commits lægges direkte her og push overlades
+  fortsat til brugeren.
 - `TODO.pdf` er untracked og med vilje ikke committet (forældes hurtigt).
 - Media ligger aldrig i git (`.gitignore`); kun lokalt + på PVC.
 
@@ -77,8 +75,19 @@ forbliver nginx over HTTPS. Se dialog-notatet
 ## Fase 3 — flere feeds (tao m.fl.)
 
 **Feeds i drift:** rod-feedet (`/feed.xml`) og bøgerne `/tao/lieh-tzu/feed.xml`
-og `/tao/sayings-of-lao-tzu/feed.xml` — alle genereret Atom med selv-hostede
-medier på PVC'en.
+og `/tao/sayings-of-lao-tzu/feed.xml` samt
+`/tao/musings-of-a-chinese-mystic/feed.xml` — alle genereret Atom med
+selv-hostede medier på PVC'en.
+
+**Musings of a Chinese Mystic** (tilføjet 2026-09-28): LibriVox-item
+`musings_of_a_chinese_mystic_1702_librivox` (RSS 11547), 14 afsnit
+(Introduction i to dele + 12 kapitler), ~67 MB, importeret med
+`--theme tao --book musings-of-a-chinese-mystic`. Det er Lionel Giles' udvalg
+af **H. A. Giles'** 1889-oversættelse — tekstgrundlaget er derfor frit i DK/EU
+(H. A. Giles d. 1935), mens indledningen er beskyttet til og med 2028. Udvalget
+omgrupperer 1889-kapitlerne, og der findes ingen fri kapitelinddelt tekst, så
+`external_url` + den synlige URL peger på **bogniveau** (1906-scanningen
+`musingsachinese00gilegoog` på archive.org) i stedet for pr. kapitel.
 
 **The Sayings of Lao Tzu** (tilføjet 2026-09-28): LibriVox-item
 `sayings_of_lao_tzu_1809_librivox` (RSS 12948), læst af Nemo, 10 afsnit

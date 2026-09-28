@@ -13,12 +13,14 @@
 > [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
 > push overlades til brugeren. Kontekst: higgs er i drift med flere feeds —
 > rod-feedet på https://higgs.gihc.online/feed.xml og bøger under temaer, fx
-> https://higgs.gihc.online/tao/lieh-tzu/feed.xml (genereret Atom med
-> selv-hostede medier på PVC'en). Nye bøger importeres med
+> https://higgs.gihc.online/tao/musings-of-a-chinese-mystic/feed.xml (tre
+> tao-bøger: lieh-tzu, sayings-of-lao-tzu og musings-of-a-chinese-mystic —
+> genereret Atom med selv-hostede medier på PVC'en). Musings mangler dog
+> deploy. Nye bøger importeres med
 > scripts/import-librivox.py, der skriver i de markerede
 > "importerede feeds"-blokke i build.py og k8s/ — redigér dem ikke i hånden.
-> Fase 3 (flere feeds) er færdig og i drift; se HANDOVER → Git-tilstand for
-> branch- og merge-status. Fase 2 (IPFS) er deployet internt: gateway i k3s,
+> Fase 3 (flere feeds) er færdig og i drift, og alt er merget og pushet
+> (`trunk` = `origin/trunk`). Fase 2 (IPFS) er deployet internt: gateway i k3s,
 > medier pinnet, men ipfs.higgs.gihc.online mangler stadig offentlig DNS, så
 > IPFS-enclosure-linkene i feedet er døde (nginx-linket står først, så
 > afspilning virker). Mål i denne session:
@@ -90,8 +92,9 @@
       Verificeret udefra: enclosure `206 audio/mpeg`, cover
       `200 image/jpeg`
 - [ ] **Afventer bruger:** fjern + genindlæs `tao/lieh-tzu` i AntennaPod (RSS →
-      Atom betyder nye entry-id'er, så de gamle afsnit skal væk), og push
-      branchen `feat/flere-feeds`
+      Atom betyder nye entry-id'er, så de gamle afsnit skal væk). Push er sket:
+      `feat/flere-feeds` blev merget fast-forward ind i `trunk`, og
+      `trunk` = `origin/trunk`.
 - [ ] **Åbent (fase 2):** IPFS-enclosure-URL'erne i feedet er døde, indtil
       DNS-blokeringen for `ipfs.higgs.gihc.online` er løst. De ligger efter
       nginx-enclosure'en pr. afsnit, så afspilning er upåvirket. Alternativ:
@@ -167,9 +170,9 @@
       `summary`: ankerets tekst *er* URL'en, så den overlever som synlig tekst
       og bliver klikbar. Verificeret med en simulering af AntennaPods
       behandling for alle otte afsnit. **Vigtig viden om Atom + AntennaPod.**
-- [ ] **Afventer bruger:** push + `scripts/deploy.sh`; derefter genindlæses
-      feedet i AntennaPod (ingen ny tilmelding nødvendig — entry-id'er og
-      datoer er uændrede)
+- [ ] **Afventer bruger:** `scripts/deploy.sh`; derefter genindlæses feedet i
+      AntennaPod (ingen ny tilmelding nødvendig — entry-id'er og datoer er
+      uændrede)
 - [x] **Bog nr. 2 i tao: The Sayings of Lao Tzu** importeret med
       `scripts/import-librivox.py --theme tao --book sayings-of-lao-tzu --rss
       https://librivox.org/rss/12948`. Item `sayings_of_lao_tzu_1809_librivox`,
@@ -184,6 +187,33 @@
 - [ ] **Afventer bruger:** `scripts/deploy.sh --sync-media` (+ evt.
       `--sync-ipfs`) og tilmelding af
       `https://higgs.gihc.online/tao/sayings-of-lao-tzu/feed.xml`
+
+### Bog nr. 3 i tao: Musings of a Chinese Mystic
+
+- [x] **Importeret** med `scripts/import-librivox.py --theme tao --book
+      musings-of-a-chinese-mystic --rss https://librivox.org/rss/11547
+      --title '…'` — LibriVox-item `musings_of_a_chinese_mystic_1702_librivox`,
+      14 afsnit (Introduction i to dele + 12 kapitler), ~67 MB, alle filer
+      md5-verificeret. `--title` rydder RSS'ens titel, der havde forfatternes
+      levetider med. Feedet er `tao/musings-of-a-chinese-mystic` (14 poster),
+      og egenkontrollen (`build.py --strict-media` + `kubectl kustomize`) er
+      grøn.
+- [x] **Tekst-link på bogniveau (bevidst valg):** Wikisource har ikke bogen, og
+      Gutenberg har Giles' **1889**-udgave (e-bog 59709) med en *anden*
+      kapitelinddeling — "Musings" (1906) er en omgruppering af de samme
+      oversættelser, jf. bogens egen note ("drawn … from the translation by
+      Professor H. A. Giles (Quaritch, 1889)"). Kapitelinddelingen er
+      verificeret 1:1 mod bogens indholdsfortegnelse (OCR-teksten fra
+      `musingsachinese00gilegoog`: Introduction s. 7, herefter 12 kapitler).
+      Derfor peger `external_url` og den synlige URL i beskrivelsen på
+      1906-scanningen i stedet for et kapitel pr. afsnit.
+- [x] **Ophavsret (ny nuance):** oversættelsen er H. A. Giles' (d. 1935) og
+      dermed fri i DK/EU; udvalget og indledningen er Lionel Giles' (d. 1958)
+      og beskyttet i DK/EU til og med 2028. Vi hoster kun LibriVox-lyden (PD i
+      USA) og linker til teksten — samme linje som de to andre bøger.
+- [ ] **Afventer bruger:** `scripts/deploy.sh --sync-media` (+ evt.
+      `--sync-ipfs`) og tilmelding af
+      `https://higgs.gihc.online/tao/musings-of-a-chinese-mystic/feed.xml`
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 
@@ -277,8 +307,10 @@
 
 - [x] Registry `FEEDS` i build.py: per-feed URL-sti, type og indholdskilde
 - [x] Én ConfigMap pr. feed + mount på feedets URL-sti
-- [x] Vedhæftet Lieh-Tzu-RSS på `/tao/lieh-tzu/feed.xml` — afventer deploy
-- [ ] Flere bøger under `tao` (via `scripts/import-librivox.py`)
+- [x] Lieh-Tzu på `/tao/lieh-tzu/feed.xml` — senere konverteret til genereret
+      Atom med selv-hostede medier
+- [x] Bog nr. 2 og 3 under `tao` (Sayings of Lao Tzu, Musings of a Chinese
+      Mystic) — begge importeret med `scripts/import-librivox.py`
 - [ ] Næste tema efter `tao`
 - [ ] Evt. browsbar forside med listen af feeds (variant B — ikke besluttet)
 
