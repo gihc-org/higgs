@@ -54,6 +54,10 @@ spec:
               mountPath: /usr/share/nginx/html/tao/sayings-of-lao-tzu/feed.xml
               subPath: feed.xml
               readOnly: true
+            - name: feed-tao-musings-of-a-chinese-mystic
+              mountPath: /usr/share/nginx/html/tao/musings-of-a-chinese-mystic/feed.xml
+              subPath: feed.xml
+              readOnly: true
             # <<< importerede feeds (volumeMounts) <<<
             - name: media
               mountPath: /usr/share/nginx/html/media
@@ -68,6 +72,9 @@ spec:
         - name: feed-tao-sayings-of-lao-tzu
           configMap:
             name: higgs-feed-tao-sayings-of-lao-tzu
+        - name: feed-tao-musings-of-a-chinese-mystic
+          configMap:
+            name: higgs-feed-tao-musings-of-a-chinese-mystic
         # <<< importerede feeds (volumes) <<<
         - name: media
           persistentVolumeClaim:

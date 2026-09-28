@@ -144,6 +144,34 @@ FEEDS: tuple[Feed, ...] = (
             "from ancient Chinese texts. - Summary by Nemo"
         ),
     ),
+    # kilde: https://librivox.org/rss/11547
+    Feed(
+        key="tao/musings-of-a-chinese-mystic",
+        path="/tao/musings-of-a-chinese-mystic/feed.xml",
+        title="Musings of a Chinese Mystic: Selections from the Philosophy of Chuang Tzu",
+        author="LibriVox",
+        kind="generated",
+        output="k8s/feeds/tao/musings-of-a-chinese-mystic/feed.xml",
+        content_dir="content/tao/musings-of-a-chinese-mystic",
+        logo="/media/tao/musings-of-a-chinese-mystic/cover.jpg",
+        subtitle=(
+            "If Lao Tzu then had revolted against the growing artificiality of life "
+            "in his day, a return to nature must have seemed doubly imperative to his "
+            "disciple Chuang Tzu, who flourished more than a couple of centuries "
+            "later, when the bugbear of civilisation had steadily advanced. With "
+            "chagrin he saw that Lao Tzu's teaching had never obtained any firm hold "
+            "on the masses, still less on the rulers of China, whereas the star of "
+            "Confucius was unmistakably in the ascendant. Within his own recollection "
+            "the propagation of Confucian ethics had received a powerful impetus from "
+            "Mencius, the second of China's orthodox sages. Now Chuang Tzu was imbued "
+            "to the core with the principles of pure Taoism, as handed down by Lao "
+            "Tzu. He might more fitly be dubbed \"the Tao-saturated man\" than Spinoza "
+            "\"the God-intoxicated.\" Tao in its various phases pervaded his inmost "
+            "being and was reflected in all his thought. He was therefore eminently "
+            "qualified to revive his Master's ringing protest against the "
+            "materialistic tendencies of the time. - Summary by Lionel Giles"
+        ),
+    ),
     # <<< importerede feeds (FEEDS) <<<
 )
 
