@@ -53,8 +53,16 @@
       (`k8s/feeds/`, `k8s/nginx/default.conf`)
 - [x] Docs opdateret: README ("Flere feeds", repostruktur, neutralitets-ankre,
       beslutninger), AGENTS.md (neutralitets-anker 2) og HANDOVER.md
-- [ ] **Afventer bruger:** `scripts/deploy.sh` + verifikation af
-      `/tao/lieh-tzu/feed.xml` i AntennaPod; derefter push af branchen
+- [x] **Deployet** (brugeren kørte `scripts/deploy.sh`): `/tao/lieh-tzu/feed.xml`
+      svarer HTTP 200 + `application/rss+xml` og er byte-identisk med
+      `feeds/tao/lieh-tzu/feed.xml`; rod-feedet er uændret (inkl. IPFS-enclosure)
+- [x] Fejl fundet og rettet efter deploy: `curl … | grep -q` sammen med
+      `set -o pipefail` gav falsk "titlen er ikke …" — grep lukker røret, så
+      curl afbrydes med exit 23 midt i svaret (målt 2/10 kørsler mod live).
+      Verifikationen henter nu hele svaret i én request uden pipe.
+      **Vigtig viden til næste session.**
+- [ ] **Afventer bruger:** tilmeld `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`
+      i AntennaPod, og push branchen `feat/flere-feeds`
 - [ ] **Afventer beslutning:** skal Lieh-Tzu (og kommende bøger) senere
       konverteres til genererede feeds? Kræver eksterne enclosures med
       `url`/`length`/`duration` og RSS 2.0 + `itunes:`-output i generatoren —

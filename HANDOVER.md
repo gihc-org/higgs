@@ -17,9 +17,11 @@ deployede feed indeholder IPFS-enclosure'en.
 recorden findes i Simplys API, men serveres ikke af de autoritative
 nameservere (se DNS-afsnittet nedenfor).
 
-Fase 3 (flere feeds) er bygget på branch `feat/flere-feeds` og afventer
-deploy + push: `build.py` har nu registry'et `FEEDS`, og Lieh-Tzu ligger som
-**vedhæftet** RSS-feed på `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`.
+Fase 3 (flere feeds) er bygget og **deployet** på branch `feat/flere-feeds`
+(afventer kun push + test i AntennaPod): `build.py` har nu registry'et `FEEDS`,
+og Lieh-Tzu ligger som **vedhæftet** RSS-feed på
+`https://higgs.gihc.online/tao/lieh-tzu/feed.xml` — HTTP 200,
+`application/rss+xml`, byte-identisk med `feeds/tao/lieh-tzu/feed.xml`.
 Rod-feedets entry-id'er er verificeret byte-identiske efter omlægningen, så
 eksisterende lyttere er upåvirkede.
 
@@ -93,8 +95,17 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 - **Verifikation:** `make verify` parser alle feeds; `scripts/deploy.sh`
   verificerer HTTP 200 + Content-Type + titel for alle feeds via
   `python3 build.py --list`.
-- **Afventer:** deploy (`scripts/deploy.sh`) + test af
-  `/tao/lieh-tzu/feed.xml` i AntennaPod, og push af branchen.
+- **Deployet:** `/tao/lieh-tzu/feed.xml` er live (HTTP 200,
+  `application/rss+xml`) og byte-identisk med repoets fil; rod-feedet er
+  uændret inkl. IPFS-enclosure.
+- **Lærdom (vigtig):** `curl … | grep -q` under `set -o pipefail` giver falske
+  fejl efter et vellykket deploy — `grep -q` lukker røret, når den har matchet,
+  hvorefter curl afbrydes med exit 23 midt i svaret (målt 2/10 kørsler mod det
+  live feed). `scripts/deploy.sh` henter derfor hele svaret i én request og
+  matcher uden pipe. Samme fælde gælder alle `… | grep -q` i scripts med
+  `pipefail`.
+- **Afventer:** tilmelding af `/tao/lieh-tzu/feed.xml` i AntennaPod og push af
+  branchen `feat/flere-feeds`.
 
 ## DNS — åben blokering (løses først i næste session)
 
