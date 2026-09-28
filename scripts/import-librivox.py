@@ -153,11 +153,21 @@ def collapse(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip()
 
 
+def strip_html(text: str) -> str:
+    """archive.org-beskrivelser indeholder ofte HTML — Atom <subtitle> er tekst."""
+    import html as _html
+
+    return collapse(_html.unescape(re.sub(r"<[^>]+>", "", text or "")))
+
+
 def pretty_duration(value: str) -> str:
-    """LibriVox skriver 00:14:41 — vi viser 14:41 når timetallet er nul."""
+    """LibriVox skriver 00:14:41, archive.org kan skrive 01:40 — vi viser 14:41/1:40."""
     m = re.fullmatch(r"(\d+):(\d{2}):(\d{2})", value or "")
     if m and int(m.group(1)) == 0:
         return f"{int(m.group(2))}:{m.group(3)}"
+    m = re.fullmatch(r"(\d{1,2}):(\d{2})", value or "")
+    if m:
+        return f"{int(m.group(1))}:{m.group(2)}"
     return value
 
 
@@ -179,7 +189,7 @@ def parse_rss(data: bytes, item_hint: str | None) -> Book:
     if channel is None:
         raise SystemExit("RSS-filen har ingen <channel>")
     title = collapse(channel.findtext("title") or "")
-    description = collapse(channel.findtext("description") or channel.findtext(f"{ITUNES}summary") or "")
+    description = strip_html(channel.findtext("description") or channel.findtext(f"{ITUNES}summary") or "")
     link = collapse(channel.findtext("link") or "")
     image = channel.find(f"{ITUNES}image")
     cover_url = (image.get("href") if image is not None else "") or ""
@@ -215,7 +225,7 @@ def parse_item(item: str) -> Book:
     meta = fetch_json(f"https://archive.org/metadata/{item}")
     md = meta.get("metadata", {})
     title = collapse(md.get("title") or item)
-    description = collapse(md.get("description") or "")
+    description = strip_html(md.get("description") or "")
     link = f"https://archive.org/details/{item}"
     published = (md.get("publicdate") or md.get("date") or "")[:10]
     return Book(
@@ -246,7 +256,7 @@ def fill_from_metadata(book: Book, variant: str) -> None:
     book.server = meta.get("server", "") or book.server
     book.directory = meta.get("dir", "") or book.directory
     if not book.description:
-        book.description = collapse(md.get("description") or "")
+        book.description = strip_html(md.get("description") or "")
     if book.publicdate is None:
         published = (md.get("publicdate") or md.get("date") or "")[:10]
         if _is_date(published):
@@ -285,13 +295,28 @@ def fill_from_metadata(book: Book, variant: str) -> None:
         if not track.duration:
             info = track.files.get(variant)
             if info:
-                track.duration = _mmss(_seconds_of(by_name[info["name"]].get("length")))
+                seconds = _seconds_of(by_name[info["name"]].get("length"))
+                track.duration = _mmss(seconds) if seconds else ""
 
 
 def _seconds_of(value: str | None) -> float:
+    """archive.org skriver længden som sekunder ('100.49') eller mm:ss ('01:40')."""
+    if not value:
+        return 0.0
+    text = str(value).strip()
+    if ":" in text:
+        parts = [p for p in text.split(":") if p != ""]
+        try:
+            numbers = [float(p) for p in parts]
+        except ValueError:
+            return 0.0
+        total = 0.0
+        for number in numbers:
+            total = total * 60 + number
+        return total
     try:
-        return float(value) if value else 0.0
-    except (TypeError, ValueError):
+        return float(text)
+    except ValueError:
         return 0.0
 
 
@@ -389,6 +414,7 @@ def main(argv: list[str] | None = None) -> int:
     src.add_argument("--item", help="archive.org-item-id")
     parser.add_argument("--variant", choices=sorted(VARIANTS), default="64kb", help="lydvariant (default: 64kb)")
     parser.add_argument("--date", help="basisdato YYYY-MM-DD (default: archive.orgs publicdate)")
+    parser.add_argument("--title", help="overstyr feed-titlen (archive.org mangler nogle gange en brugbar titel)")
     parser.add_argument("--oldest-first", action="store_true", help="gør kapitel 1 ældst i stedet for nyest")
     parser.add_argument("--dry-run", action="store_true", help="vis kun planen — hent og skriv intet")
     args = parser.parse_args(argv)
@@ -399,6 +425,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"== læser kilde ({args.rss or args.item}) ==")
     book = parse_rss(fetch(args.rss), args.item) if args.rss else parse_item(args.item)
     fill_from_metadata(book, args.variant)
+    if args.title:
+        book.title = args.title
+    elif book.title == book.item:
+        print(
+            "   advarsel: archive.org gav ingen titel — bruger item-id'et. Overvej --title",
+            file=sys.stderr,
+        )
     if not book.tracks:
         raise SystemExit("fandt ingen spor i kilden")
 
