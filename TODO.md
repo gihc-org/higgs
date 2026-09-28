@@ -16,8 +16,51 @@
 > medie-episode. Fase 2 (IPFS) er bygget og deployet internt: Kubo-gateway i
 > k3s, medier pinned, feedet indeholder IPFS-enclosure — men
 > ipfs.higgs.gihc.online er ikke offentligt nåelig endnu (DNS-blokering, se
-> HANDOVER). Mål i denne session:
+> HANDOVER). Flere feeds (fase 3) er bygget på branch `feat/flere-feeds`:
+> registry `FEEDS` i build.py, Lieh-Tzu som vedhæftet RSS-feed på
+> /tao/lieh-tzu/feed.xml — afventer deploy. Mål i denne session:
 > <indsæt mål>."
+
+## Session 2026-09-28 — flere feeds (tao m.fl.)
+
+- [x] **Beslutning (URL-skema):** nye feeds ligger som stier under
+      `higgs.gihc.online` (`/tao/lieh-tzu/feed.xml`) i stedet for et subdomæne
+      pr. bog. Ny bog = ingen DNS-record og intet nyt cert. Begrundelse og
+      alternativer (A/B/C) står i README → "Flere feeds".
+- [x] **Beslutning (format):** Lieh-Tzu **vedhæftes** som færdig RSS-fil frem
+      for at blive konverteret til genereret Atom nu — det bevarer
+      LibriVox-metadata, `guid`'er og de eksterne archive.org-enclosures.
+      Konvertering til genereret feed er stadig mulig senere (se "Afventer").
+- [x] Feature-branch `feat/flere-feeds` oprettet (arbejdet ligger her; push
+      overlades til brugeren)
+- [x] `build.py`: registry `FEEDS` (genererede + vedhæftede feeds).
+      `SITE_BASE` + `FEEDS` er nu det eneste sted, domæne og feed-URL'er
+      lever; `--list` udskriver feeds som TSV til deploy-verifikation
+- [x] `build.py` genererer også `k8s/nginx/default.conf` med korrekt
+      Content-Type pr. feed (atom for genererede, rss for vedhæftede) —
+      filen er nu gitignoreret artefakt
+- [x] `content/` → `content/higgs/` for rod-feedet; **entry-id'er verificeret
+      byte-identiske** med før omlægningen (ingen genlæsning for læsere)
+- [x] Lieh-Tzu flyttet fra repo-roden til `feeds/tao/lieh-tzu/feed.xml`, og
+      `<atom:link rel="self">` rettet til den rigtige URL. Build fejler, hvis
+      self-link og registry ikke matcher (den gamle "HUSK" er nu håndhævet)
+- [x] k8s: én ConfigMap pr. feed (`higgs-feed`, `higgs-feed-tao-lieh-tzu`) +
+      mount på `/usr/share/nginx/html/tao/lieh-tzu/feed.xml`;
+      `kubectl kustomize k8s/` verificeret lokalt (ConfigMaps, keys, mounts)
+- [x] `scripts/deploy.sh`: verificerer alle feeds fra `python3 build.py
+      --list` (HTTP 200 + Content-Type + titel) i stedet for én hardcoded URL
+- [x] `make verify` parser alle feeds; `.gitignore` opdateret
+      (`k8s/feeds/`, `k8s/nginx/default.conf`)
+- [x] Docs opdateret: README ("Flere feeds", repostruktur, neutralitets-ankre,
+      beslutninger), AGENTS.md (neutralitets-anker 2) og HANDOVER.md
+- [ ] **Afventer bruger:** `scripts/deploy.sh` + verifikation af
+      `/tao/lieh-tzu/feed.xml` i AntennaPod; derefter push af branchen
+- [ ] **Afventer beslutning:** skal Lieh-Tzu (og kommende bøger) senere
+      konverteres til genererede feeds? Kræver eksterne enclosures med
+      `url`/`length`/`duration` og RSS 2.0 + `itunes:`-output i generatoren —
+      nødvendigt hvis feeds skal i Apple Podcasts (Atom accepteres ikke der)
+- [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
+      næste, og hvilke temaer der kommer efter `tao`
 
 ## Session 2026-08-31 (aften)
 
@@ -62,6 +105,10 @@
 - [x] Medier: første episode live (TL;DR — Mastering Monero, m4a på PVC)
 - [x] VPS-IP er ikke statisk: DNS-scriptet hardcoder ikke IP — den angives
       eksplicit eller udledes fra zonens A-records; recorden opdateres ved ændring
+- [x] Flere feeds: sti pr. bog under `higgs.gihc.online` (fx
+      `/tao/lieh-tzu/feed.xml`) — ikke ét subdomæne pr. bog
+- [x] Vedhæftede feeds: færdig XML committes i `feeds/<tema>/<bog>/feed.xml` og
+      kopieres til `k8s/` af build.py (genererede feeds bliver i `content/<feed>/`)
 
 ## Fase 1 — minimalt feed (nu)
 
@@ -100,6 +147,15 @@
 - [x] `scripts/sync-ipfs.sh`: pin medier i gateway-pod'en
 - [ ] ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant pinning
 - [ ] README-noter om WebTorrent/Handshake som research (ikke bygget)
+
+## Fase 3 — flere feeds (temaer/bøger) — i gang
+
+- [x] Registry `FEEDS` i build.py: per-feed URL-sti, type og indholdskilde
+- [x] Én ConfigMap pr. feed + mount på feedets URL-sti
+- [x] Vedhæftet Lieh-Tzu-RSS på `/tao/lieh-tzu/feed.xml` — afventer deploy
+- [ ] Flere bøger under `tao` (samme vedhæftede flow)
+- [ ] Næste tema efter `tao`
+- [ ] Evt. browsbar forside med listen af feeds (variant B — ikke besluttet)
 
 ## Ikke-mål lige nu
 

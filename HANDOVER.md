@@ -1,4 +1,4 @@
-# HANDOVER — higgs (2026-08-31, aften)
+# HANDOVER — higgs (2026-09-28)
 
 > Læs dette før alt andet i en ny session, sammen med README.md, TODO.md,
 > AGENTS.md og STRATEGI.md. Dette dokument beskriver tilstanden og de
@@ -17,6 +17,12 @@ deployede feed indeholder IPFS-enclosure'en.
 recorden findes i Simplys API, men serveres ikke af de autoritative
 nameservere (se DNS-afsnittet nedenfor).
 
+Fase 3 (flere feeds) er bygget på branch `feat/flere-feeds` og afventer
+deploy + push: `build.py` har nu registry'et `FEEDS`, og Lieh-Tzu ligger som
+**vedhæftet** RSS-feed på `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`.
+Rod-feedets entry-id'er er verificeret byte-identiske efter omlægningen, så
+eksisterende lyttere er upåvirkede.
+
 ## Sådan arbejder vi (kort version — fulde regler i AGENTS.md)
 
 - Sprog: dansk i samtale, dokumentation og commits.
@@ -32,6 +38,8 @@ nameservere (se DNS-afsnittet nedenfor).
 - Fase 1-commits (`4d15a33`, `2bf61d9`) er pushet. Siden da ligger
   `cff57ca` → `154c44a` (fase 2 + alle rettelser) lokalt og afventer
   brugerens push.
+- Fase 3 (flere feeds) ligger på branch `feat/flere-feeds` oven på `trunk` —
+  ikke pushet og ikke deployet.
 - `TODO.pdf` er untracked og med vilje ikke committet (forældes hurtigt).
 - Media ligger aldrig i git (`.gitignore`); kun lokalt + på PVC.
 
@@ -59,6 +67,34 @@ forbliver nginx over HTTPS. Se dialog-notatet
 - Verificeret: `episode.m4a` pinned recursive; dir-CID
   `bafybeig4lawleiugo5hsagvt6ubgrj7qqdkajjvthmmpr7xr4jqapvgdyu` matcher
   build.py; live feed indeholder enclosure-URL'en.
+
+## Fase 3 — flere feeds (tao m.fl.)
+
+Design: ét repo, mange feeds. `FEEDS` i `build.py` er registry'et — hver post
+har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
+`SITE_BASE` er fortsat det eneste sted, domænet lever.
+
+- **URL-skema (besluttet):** nye feeds er stier under `higgs.gihc.online`, ikke
+  subdomæner pr. bog. En ny bog kræver dermed hverken DNS-record eller cert;
+  `tao` er temaet, `lieh-tzu` bogen. Stien er abonnements-kontrakten og kan
+  ikke laves om bagefter uden at læserne skal tilmelde sig igen.
+- **To slags feeds:** `generated` (markdown i `content/<key>/` → Atom) og
+  `attached` (færdig XML i `feeds/<key>/`, fx rettede LibriVox-RSS-filer med
+  eksterne archive.org-enclosures). Vedhæftede feeds kopieres uændret til
+  `k8s/feeds/<key>/feed.xml`; build fejler, hvis `<atom:link rel="self">` ikke
+  matcher registry'et.
+- **Lieh-Tzu** ligger i `feeds/tao/lieh-tzu/feed.xml` med self-link på
+  `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`. Filen er den rettede
+  LibriVox-RSS (pubDate + guid pr. episode, så bogens rækkefølge holder i
+  AntennaPod). Cover og lyd ligger fortsat på archive.org — intet medie hostes.
+- **k8s:** én ConfigMap pr. feed (`higgs-feed`, `higgs-feed-tao-lieh-tzu`),
+  monteret på feedets sti i nginx-pod'en. `k8s/nginx/default.conf` genereres nu
+  af `build.py` (Content-Type pr. feed) og er gitignoreret som artefakt.
+- **Verifikation:** `make verify` parser alle feeds; `scripts/deploy.sh`
+  verificerer HTTP 200 + Content-Type + titel for alle feeds via
+  `python3 build.py --list`.
+- **Afventer:** deploy (`scripts/deploy.sh`) + test af
+  `/tao/lieh-tzu/feed.xml` i AntennaPod, og push af branchen.
 
 ## DNS — åben blokering (løses først i næste session)
 
@@ -102,8 +138,12 @@ forbliver nginx over HTTPS. Se dialog-notatet
 ## Nylige beslutninger (begrundelser står i README.md)
 
 - Vendor-neutralitet: feedet er produktet, hosting udskiftelig.
-- Stabile URL'er er kontrakten; `FEED_BASE` i `build.py` er eneste sted,
-  domænet lever.
+- Stabile URL'er er kontrakten; `SITE_BASE` + registry'et `FEEDS` i `build.py`
+  er eneste sted, domæne og feed-stier lever.
+- Flere feeds som stier under `higgs.gihc.online` (`/tao/lieh-tzu/feed.xml`),
+  ikke subdomæne pr. bog — ny bog koster ingen DNS-record og intet cert.
+- Vedhæftede feeds (færdig XML i `feeds/<key>/`) hvor kilden er en rettet
+  LibriVox-RSS; genererede feeds hvor indholdet er eget markdown.
 - Subdomæne frem for apex (apex `gihc.online` holdes fri).
 - Medier på PVC (ConfigMap har 1 MiB-grænse); stabile stier er exit-strategien.
 - IPFS i fase 2 som ekstra sti, ikke erstatning; gateway in-cluster med
@@ -114,16 +154,19 @@ forbliver nginx over HTTPS. Se dialog-notatet
 
 ## Naturlige næste skridt
 
-1. **Løs DNS-blokeringen** for `ipfs.higgs.gihc.online` (afsnittet ovenfor) —
+1. **Deploy fase 3** (`scripts/deploy.sh` på branch `feat/flere-feeds`) og
+   verificér `/tao/lieh-tzu/feed.xml` i AntennaPod; push branchen.
+2. **Løs DNS-blokeringen** for `ipfs.higgs.gihc.online` (afsnittet ovenfor) —
    kræver brugerens Simply-adgang.
-2. Når gatewayen er offentlig: verificér curl + cert; gen-deploy kun hvis cert
+3. Når gatewayen er offentlig: verificér curl + cert; gen-deploy kun hvis cert
    ikke kom.
-3. ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant
+4. Flere bøger under `tao` (samme vedhæftede flow) og næste tema.
+5. ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant
    pinning/backup af medierne.
-4. Flere poster/episoder i samme flow (`scripts/deploy.sh --sync-media
+6. Flere poster/episoder i samme flow (`scripts/deploy.sh --sync-media
    --sync-ipfs`).
-5. README-noter om WebTorrent/Handshake som research (ikke bygget).
-6. Overblik-projektet ligger uden for dette repo:
+7. README-noter om WebTorrent/Handshake som research (ikke bygget).
+8. Overblik-projektet ligger uden for dette repo:
    `/home/kristian/projects/overblik/README.md` (ikke git-initialiseret
    endnu). Kan verificeres live med `kubectl get ingress -A`.
 
@@ -133,6 +176,12 @@ forbliver nginx over HTTPS. Se dialog-notatet
 curl -sS https://higgs.gihc.online/feed.xml | head
 # forvent: HTTP 200, Content-Type: application/atom+xml, gyldigt LE-cert
 curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
+  https://higgs.gihc.online/tao/lieh-tzu/feed.xml
+# forvent: HTTP 200 application/rss+xml (vedhæftet Lieh-Tzu-feed)
+curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
   https://ipfs.higgs.gihc.online/ipfs/bafybeig4lawleiugo5hsagvt6ubgrj7qqdkajjvthmmpr7xr4jqapvgdyu/episode.m4a
 # forvent (når DNS er løst): HTTP 200 audio/mp4
 ```
+
+`scripts/deploy.sh` dækker de to første automatisk (den læser feed-listen fra
+`python3 build.py --list`).

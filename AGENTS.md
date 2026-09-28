@@ -4,9 +4,11 @@
 
 Et minimalt, statisk Atom-feed på
 [https://higgs.gihc.online/feed.xml](https://higgs.gihc.online/feed.xml).
-Indhold er markdown i `content/`; `build.py` genererer `k8s/feed.xml`, som
-deployes som ConfigMap (kustomize) bag nginx + ingress. Ingen backend, ingen
-CI, ingen image-build, ingen secrets.
+Indhold er markdown i `content/` (genererede feeds) og XML i `feeds/`
+(vedhæftede feeds, fx LibriVox-RSS); `build.py` har registry'et `FEEDS` og
+genererer `k8s/feed.xml` + `k8s/feeds/`, som deployes som ConfigMaps
+(kustomize) bag nginx + ingress. Ingen backend, ingen CI, ingen image-build,
+ingen secrets.
 
 Vendor-neutralitet er designprincippet: **feedet er produktet, hosting er
 udskiftelig.** Læs `README.md` (hvordan/hvorfor), `STRATEGI.md` (den
@@ -30,10 +32,11 @@ beskyt de tre neutralitets-ankre:
 1. **Stabile URL'er er kontrakten.** `media/<slug>/<fil>` ændres aldrig.
    Omdøb/flyt aldrig content-filer — filnavnet er slug'en og entry-id'et
    (`uuid5`), så ændringer markerer gamle poster som nye for læsere.
-2. **Én konstant for feed-URL'en.** `FEED_BASE` i `build.py` er det eneste
-   sted, domænet lever. Domæne-/host-skift er én linje + ingress.
+2. **Ét sted for feed-URL'er.** `SITE_BASE` + registry'et `FEEDS` i
+   `build.py` er det eneste sted, domænet og feed-stierne lever.
+   Domæne-/host-skift er én linje + ingress.
 3. **Git er sandheden, serveren er en kopi.** `make build` skal altid kunne
-   genskabe `feed.xml` fra `content/` + `build.py`.
+   genskabe feedene fra `content/` + `feeds/` + `build.py`.
 
 ## Vigtige regler
 
@@ -42,8 +45,8 @@ beskyt de tre neutralitets-ankre:
 - **Medier hører ikke i git.** `media/` er gitignoreret; upload via
   `make sync-media` (kubectl cp). ConfigMap har en 1 MiB-grænse — binære
   medier kan aldrig bo der.
-- **Kustomize kan ikke se uden for `k8s/`** — derfor genereres `feed.xml` ind
-  i `k8s/` og er gitignoreret som artefakt.
+- **Kustomize kan ikke se uden for `k8s/`** — derfor genereres `feed.xml` og
+  `feeds/<key>/feed.xml` ind i `k8s/` og er gitignorerede som artefakter.
 - **Deploy kræver tunnel + byg:** `make build`, derefter
   `kubectl apply -k k8s/` (kubeconfig ligger uden for repoet, i
   `~/.kube/gihc.yml` — se `scripts/deploy.sh`). Verificér altid efter deploy:
