@@ -1,4 +1,4 @@
-.PHONY: build verify deploy sync-media
+.PHONY: build verify deploy sync-media fetch-media
 
 # Kubeconfig ligger uden for alle repos (skrives af infra's ansible-playbook).
 # Overstyr med KUBECONFIG=... hvis du har den et andet sted.
@@ -24,3 +24,7 @@ deploy:
 sync-media:
 	POD=$$(kubectl -n higgs get pod -l app=higgs -o jsonpath='{.items[0].metadata.name}'); \
 	kubectl cp media/ higgs/$$POD:/usr/share/nginx/html/
+
+# Media er ikke i git: hent dem over HTTPS på en ny maskine.
+fetch-media:
+	python3 scripts/fetch-media.py

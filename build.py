@@ -397,6 +397,29 @@ def build_feed_file(feed: Feed) -> int:
     raise ValueError(f"{feed.key}: ukendt kind {feed.kind!r} (brug 'generated' eller 'attached')")
 
 
+def expected_media(feeds: tuple[Feed, ...] = FEEDS) -> list[str]:
+    """Alle mediefiler i genererede feeds: `src:`-stier og lokalt artwork.
+
+    Artwork tælles med, fordi feedets `<logo>` kan pege på en fil under media/
+    (fx `/media/tao/lieh-tzu/cover.jpg`) — den skal også med til en ny maskine.
+    """
+    srcs: list[str] = []
+    for feed in feeds:
+        if feed.kind != "generated" or not feed.content_dir:
+            continue
+        if feed.logo.startswith(("media/", "/media/")):
+            src = feed.logo.lstrip("/")
+            if src not in srcs:
+                srcs.append(src)
+        for path in sorted(Path(feed.content_dir).glob("*.md")):
+            meta, _body = parse_front_matter(path.read_text(encoding="utf-8"))
+            for item in meta.get("media", []):
+                src = item.get("src")
+                if src and src not in srcs:
+                    srcs.append(src)
+    return srcs
+
+
 def missing_media(feeds: tuple[Feed, ...]) -> list[str]:
     """Mediefiler som `src:` peger på, men som ikke findes lokalt.
 
@@ -404,17 +427,7 @@ def missing_media(feeds: tuple[Feed, ...]) -> list[str]:
     deploy.sh kører derfor med --strict-media og afbryder, hvis listen ikke er
     tom — et deploy må aldrig fjerne enclosure-links i stilhed.
     """
-    missing: list[str] = []
-    for feed in feeds:
-        if feed.kind != "generated" or not feed.content_dir:
-            continue
-        for path in sorted(Path(feed.content_dir).glob("*.md")):
-            meta, _body = parse_front_matter(path.read_text(encoding="utf-8"))
-            for item in meta.get("media", []):
-                src = item.get("src")
-                if src and not Path(src).is_file():
-                    missing.append(src)
-    return missing
+    return [src for src in expected_media(feeds) if not Path(src).is_file()]
 
 
 def validate_registry(feeds: tuple[Feed, ...]) -> None:
