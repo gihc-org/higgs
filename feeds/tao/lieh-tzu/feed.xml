@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Rettet RSS-feed for "The Book of Lieh-Tzu" (LibriVox), til brug i AntennaPod og lignende podcast-klienter.
+
+  Baggrund / fejlanalyse:
+  Det originale LibriVox-feed (https://librivox.org/rss/1263) mangler <pubDate> og <guid>
+  på alle 8 episoder. Episoderne har ganske vist <itunes:episode>-numre (0-7) i den
+  rigtige rækkefølge, men de fleste podcast-klienter - herunder AntennaPod - sorterer
+  episodelisten efter udgivelsesdato (pubDate), ikke efter itunes:episode. Uden pubDate
+  falder klienten tilbage på en intern/vilkårlig rækkefølge, hvilket er grunden til den
+  mærkelige visning ("Causality, Dreams, Confucius ...") i stedet for bogens rækkefølge
+  ("Editorial & Intro, Cosmogony, The Yellow Emperor ...").
+
+  Denne fil tilføjer:
+  - Fortløbende, stigende <pubDate> pr. episode (episode 0 = ældste dato), så
+    dato-baseret sortering matcher bogens rækkefølge.
+  - Et stabilt <guid> pr. episode (lydfilens URL), da originalen ingen guid har.
+  Selve lydfilerne (<enclosure url="...">) peger uændret på de originale filer på
+  archive.org - der er ikke lagt nye filer op noget sted.
+
+  Praktisk tip: i AntennaPod kan du under podcastens indstillinger under
+  "Episode order" / "Episoderækkefølge" sætte den til "ældste først", så
+  afspilningsrækkefølgen helt sikkert følger pubDate stigende.
+
+  Filen er et vedhæftet feed: den ligger her og kopieres uændret til
+  k8s/feeds/tao/lieh-tzu/feed.xml af build.py (registry'et FEEDS). Build fejler,
+  hvis <atom:link rel="self"> ikke peger på den URL, feedet udgives på.
+-->
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:media="http://search.yahoo.com/mrss/"
+     xmlns:creativeCommons="http://backend.userland.com/creativeCommonsRssModule"
+     xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>Book of Lieh-Tzu, The by Liezi ( - ca. 400 BC)</title>
+<link>https://librivox.org/the-book-of-lieh-tzu-by-lieh-tzu-translated-by-lionel-giles/</link>
+<language>en</language>
+<description>Although Lieh Tzu's work has evidently passed through the hands of many editors and gathered numerous accretions, there remains a considerable nucleus which in all probability was committed to writing by Lieh Tzu's immediate disciples, and is therefore older than the genuine parts of Chuang Tzu. There are some obvious analogies between the two authors, and indeed a certain amount of matter common to both; but on the whole Lieh Tzu's book bears an unmistakable impress of its own. The geniality of its tone contrasts with the somewhat hard brilliancy of Chuang Tzu, and a certain kindly sympathy with the aged, the poor and the humble of this life, not excluding the brute creation, makes itself felt throughout. - From Lionel Giles Introduction</description>
+<itunes:summary>Although Lieh Tzu's work has evidently passed through the hands of many editors and gathered numerous accretions, there remains a considerable nucleus which in all probability was committed to writing by Lieh Tzu's immediate disciples, and is therefore older than the genuine parts of Chuang Tzu. There are some obvious analogies between the two authors, and indeed a certain amount of matter common to both; but on the whole Lieh Tzu's book bears an unmistakable impress of its own. The geniality of its tone contrasts with the somewhat hard brilliancy of Chuang Tzu, and a certain kindly sympathy with the aged, the poor and the humble of this life, not excluding the brute creation, makes itself felt throughout. - From Lionel Giles Introduction</itunes:summary>
+<itunes:author>LibriVox</itunes:author>
+<itunes:category text="Arts">
+  <itunes:category text="Literature"/>
+</itunes:category>
+<itunes:image href="https://www.archive.org/download/LibrivoxCdCoverArt12/Book_Lieh-Tzu_1110.jpg"/>
+<image>
+  <url>https://www.archive.org/download/LibrivoxCdCoverArt12/Book_Lieh-Tzu_1110.jpg</url>
+  <title>Book of Lieh-Tzu, The by Liezi ( - ca. 400 BC)</title>
+  <link>https://librivox.org/the-book-of-lieh-tzu-by-lieh-tzu-translated-by-lionel-giles/</link>
+</image>
+<atom:link rel="self" href="https://higgs.gihc.online/tao/lieh-tzu/feed.xml" type="application/rss+xml"/>
+<item>
+  <title>Editorial &amp; Intro</title>
+  <itunes:episode>0</itunes:episode>
+  <itunes:duration>00:14:41</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 00:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_00_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_00_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>Cosmogony</title>
+  <itunes:episode>1</itunes:episode>
+  <itunes:duration>00:31:22</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 01:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_01_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_01_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>The Yellow Emperor</title>
+  <itunes:episode>2</itunes:episode>
+  <itunes:duration>00:35:36</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 02:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_02_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_02_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>Dreams</title>
+  <itunes:episode>3</itunes:episode>
+  <itunes:duration>00:21:46</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 03:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_03_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_03_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>Confucius</title>
+  <itunes:episode>4</itunes:episode>
+  <itunes:duration>00:12:14</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 04:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_04_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_04_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>The Questions of T'ang</title>
+  <itunes:episode>5</itunes:episode>
+  <itunes:duration>00:21:46</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 05:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_05_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_05_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>Effort &amp; Destiny</title>
+  <itunes:episode>6</itunes:episode>
+  <itunes:duration>00:10:27</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 06:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_06_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_06_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+<item>
+  <title>Causality</title>
+  <itunes:episode>7</itunes:episode>
+  <itunes:duration>00:28:30</itunes:duration>
+  <pubDate>Wed, 03 Oct 2007 07:00:00 GMT</pubDate>
+  <guid isPermaLink="true">https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_07_tzu_64kb.mp3</guid>
+  <enclosure url="https://www.archive.org/download/lieh_tzu_cm_librivox/liehtzu_07_tzu_64kb.mp3" length="0" type="audio/mpeg"/>
+</item>
+</channel>
+</rss>

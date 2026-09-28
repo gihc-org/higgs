@@ -1,5 +1,7 @@
 # Genereret
 k8s/feed.xml
+k8s/feeds/
+k8s/nginx/default.conf
 k8s/logo.svg
 k8s/logo.png
 __pycache__/

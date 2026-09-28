@@ -19,7 +19,6 @@ export KUBECONFIG
 KUBECTL=(kubectl)
 TUNNEL_CMD=(ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes \
     -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s)
-FEED_URL="https://higgs.gihc.online/feed.xml"
 
 SYNC_MEDIA=0
 SYNC_IPFS=0
@@ -61,8 +60,7 @@ ensure_tunnel() {
 }
 
 echo "== byg =="
-make build
-python3 -c "import xml.etree.ElementTree as ET; ET.parse('k8s/feed.xml'); print('feed.xml: gyldig XML')"
+make verify
 
 ensure_tunnel
 
@@ -89,24 +87,25 @@ fi
 echo "== verificér =="
 # Lige efter en Recreate-rollout kan ingressen kortvarigt svare 503,
 # indtil det nye pod er registreret som endpoint — prøv igen med pauser.
-attempt=0
-while [ "$attempt" -lt 10 ]; do
-    HTTP_CT="$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$FEED_URL" || true)"
+# Feedene kommer fra registry'et (build.py: FEEDS), så nye feeds verificeres
+# automatisk. TSV: key, url, content_type, title.
+while IFS=$'\t' read -r KEY URL CONTENT_TYPE TITLE; do
+    attempt=0
+    while [ "$attempt" -lt 10 ]; do
+        HTTP_CT="$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$URL" || true)"
+        [ "${HTTP_CT%% *}" = "200" ] && break
+        attempt=$((attempt + 1))
+        echo "verificér: $KEY — HTTP ${HTTP_CT%% *} — prøver igen om 3 s ($attempt/10)"
+        sleep 3
+    done
     CODE="${HTTP_CT%% *}"
-    [ "$CODE" = "200" ] && break
-    attempt=$((attempt + 1))
-    echo "verificér: HTTP ${CODE:-fejl} — prøver igen om 3 s ($attempt/10)"
-    sleep 3
-done
-CODE="${HTTP_CT%% *}"
-CT="${HTTP_CT#* }"
-TITLE_OK="$(curl -sS "$FEED_URL" | grep -q '<title>Higgs</title>' && echo ja || echo nej)"
-
-[ "$CODE" = "200" ] || { echo "FEJL: HTTP ${CODE:-ingen respons} på $FEED_URL efter 10 forsøg" >&2; exit 1; }
-case "$CT" in
-    application/atom+xml*) ;;
-    *) echo "FEJL: Content-Type er '$CT' (forventet application/atom+xml)" >&2; exit 1 ;;
-esac
-[ "$TITLE_OK" = "ja" ] || { echo "FEJL: feed-titlen er ikke 'Higgs'" >&2; exit 1; }
-
-echo "OK: HTTP 200, application/atom+xml, titel 'Higgs'"
+    CT="${HTTP_CT#* }"
+    [ "$CODE" = "200" ] || { echo "FEJL: HTTP ${CODE:-ingen respons} på $URL efter 10 forsøg" >&2; exit 1; }
+    case "$CT" in
+        "$CONTENT_TYPE"*) ;;
+        *) echo "FEJL: $KEY — Content-Type er '$CT' (forventet $CONTENT_TYPE)" >&2; exit 1 ;;
+    esac
+    curl -sS "$URL" | grep -qF "<title>${TITLE}</title>" \
+        || { echo "FEJL: $KEY — titlen er ikke '${TITLE}'" >&2; exit 1; }
+    echo "OK: $KEY — HTTP 200, $CT, titel '${TITLE}'"
+done < <(python3 build.py --list)

@@ -11,7 +11,7 @@ build:
 	convert -background white -density 300 logo/logo-symmetrisk.svg -resize '1024x1024>' -gravity center -extent 1024x1024 -strip k8s/logo.png
 
 verify: build
-	python3 -c "import xml.etree.ElementTree as ET; ET.parse('k8s/feed.xml'); print('feed.xml: gyldig XML')"
+	python3 -c "import xml.etree.ElementTree as ET, build; [ET.parse(f.output) for f in build.FEEDS]; print(f'feeds: gyldig XML ({len(build.FEEDS)})')"
 	file k8s/logo.png | grep -q "PNG image data" && echo "logo.png: ok"
 
 deploy:

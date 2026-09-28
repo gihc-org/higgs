@@ -15,3 +15,8 @@ configMapGenerator:
       - logo.svg
       - logo.png
       - nginx/default.conf
+  # Ét feed pr. ConfigMap: content-hash pr. feed, og 1 MiB-grænsen gælder kun
+  # det enkelte feeds filer. Artefakterne genereres af build.py (FEEDS).
+  - name: higgs-feed-tao-lieh-tzu
+    files:
+      - feeds/tao/lieh-tzu/feed.xml

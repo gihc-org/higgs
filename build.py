@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
-"""higgs: content/ → k8s/feed.xml (Atom-feed)."""
+"""higgs: feed-registry → k8s/feed.xml + k8s/feeds/<key>/feed.xml + nginx-conf.
 
+Kilden til sandhed er FEEDS nedenfor: én post pr. feed med URL-sti, titel og
+hvor indholdet kommer fra. Genererede feeds bygges fra markdown under
+content/; vedhæftede feeds (fx rettede LibriVox-RSS-filer) ligger som XML i
+feeds/ og kopieres uændret ind i k8s/, hvor kustomize kan se dem.
+
+Neutralitets-ankre (se README): SITE_BASE er det eneste sted, domænet lever;
+hver feed-URL står kun i registry'et her.
+"""
+
+import argparse
 import datetime as dt
 import re
 import shutil
@@ -9,25 +19,25 @@ import sys
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
+from xml.etree import ElementTree
 from xml.sax.saxutils import escape, quoteattr
 
 import markdown
 
 # ---------------------------------------------------------------------------
 # Neutralitets-ankre: det eneste sted URL'er og identitet bor.
-# Skift domæne/host her, og feedet følger med — intet andet.
+# SITE_BASE er domænet; hver feed har sin sti i FEEDS nedenfor.
 # ---------------------------------------------------------------------------
-FEED_BASE = "https://higgs.gihc.online"
-FEED_PATH = "/feed.xml"
-FEED_LOGO = FEED_BASE + "/logo.png"
-FEED_TITLE = "Higgs"
-FEED_AUTHOR = "Kristian Nygaard Jensen"
+SITE_BASE = "https://higgs.gihc.online"
 # Fase 2: IPFS som ekstra distributionssti — gatewayen lever også her.
 # Feedet virker uden IPFS; hvis ipfs mangler, springes IPFS-enclosures over.
 FEED_IPFS_GATEWAY = "https://ipfs.higgs.gihc.online"
 
-CONTENT_DIR = Path("content")
-OUTPUT = Path("k8s/feed.xml")  # i k8s/, fordi kustomize kun kan se filer i sin mappe
+ATOM = "application/atom+xml"
+RSS = "application/rss+xml"
+
+K8S_DIR = Path("k8s")
+NGINX_CONF = K8S_DIR / "nginx" / "default.conf"
 
 MIME_BY_EXT = {
     ".m4a": "audio/mp4",
@@ -41,6 +51,62 @@ MIME_BY_EXT = {
 }
 
 
+@dataclass(frozen=True)
+class Feed:
+    """Ét feed: hvor det bor, hvad det hedder, og hvor indholdet kommer fra."""
+
+    key: str  # unik nøgle; styrer artefakt-stien under k8s/
+    path: str  # URL-sti på SITE_BASE, fx /tao/lieh-tzu/feed.xml
+    title: str
+    author: str
+    kind: str  # "generated" (fra markdown) | "attached" (færdig XML)
+    output: str  # artefakt-sti (kustomize kan kun se filer i k8s/)
+    content_type: str = ATOM
+    content_dir: str | None = None  # generated: mappe med markdown-poster
+    source: str | None = None  # attached: XML-fil i repoet
+    logo: str = "/logo.png"  # absolut URL eller sti på SITE_BASE
+
+    @property
+    def url(self) -> str:
+        return SITE_BASE + self.path
+
+    @property
+    def anchor(self) -> str:
+        """Basis-URL for entry-id'er og medie-enclosures (mappen feedet bor i)."""
+        return SITE_BASE + self.path.rsplit("/", 1)[0] + "/"
+
+    @property
+    def logo_url(self) -> str:
+        return self.logo if "://" in self.logo else SITE_BASE + self.logo
+
+
+# ---------------------------------------------------------------------------
+# Registry: tilføj et feed her — resten (artefakt, ConfigMap i k8s/,
+# nginx-Content-Type, deploy-verifikation) følger med.
+# ---------------------------------------------------------------------------
+FEEDS: tuple[Feed, ...] = (
+    Feed(
+        key="higgs",
+        path="/feed.xml",
+        title="Higgs",
+        author="Kristian Nygaard Jensen",
+        kind="generated",
+        output="k8s/feed.xml",
+        content_dir="content/higgs",
+    ),
+    Feed(
+        key="tao/lieh-tzu",
+        path="/tao/lieh-tzu/feed.xml",
+        title="Book of Lieh-Tzu, The by Liezi ( - ca. 400 BC)",
+        author="LibriVox",
+        kind="attached",
+        output="k8s/feeds/tao/lieh-tzu/feed.xml",
+        content_type=RSS,
+        source="feeds/tao/lieh-tzu/feed.xml",
+    ),
+)
+
+
 @dataclass
 class Post:
     slug: str
@@ -51,10 +117,10 @@ class Post:
     content_html: str
     enclosures: list[dict] = field(default_factory=list)
 
-    @property
-    def entry_id(self) -> str:
-        # Stabil pr. slug: gamle poster bliver ikke genmarkeret som ulæste.
-        return str(uuid.uuid5(uuid.NAMESPACE_URL, FEED_BASE + "/" + self.slug))
+
+def entry_id(feed: Feed, slug: str) -> str:
+    """Stabil pr. slug: gamle poster bliver ikke genmarkeret som ulæste."""
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, feed.anchor + slug))
 
 
 def parse_front_matter(raw: str) -> tuple[dict, str]:
@@ -115,7 +181,7 @@ def post_datetime(meta: dict, slug: str) -> dt.datetime:
     )
 
 
-def build_enclosures(meta: dict, slug: str) -> list[dict]:
+def build_enclosures(meta: dict, feed: Feed) -> list[dict]:
     out = []
     for item in meta.get("media", []):
         src = item.get("src")
@@ -130,7 +196,7 @@ def build_enclosures(meta: dict, slug: str) -> list[dict]:
             {
                 "type": mime,
                 "length": p.stat().st_size,
-                "href": f"{FEED_BASE}/{src}",
+                "href": f"{feed.anchor}{src}",
             }
         )
         cid = ipfs_wrap_dir_cid(p)
@@ -176,9 +242,9 @@ def ipfs_wrap_dir_cid(path: Path) -> str | None:
     return proc.stdout.strip().splitlines()[-1]
 
 
-def load_posts() -> list[Post]:
+def load_posts(feed: Feed) -> list[Post]:
     posts = []
-    for path in sorted(CONTENT_DIR.glob("*.md")):
+    for path in sorted(Path(feed.content_dir).glob("*.md")):
         slug = path.stem
         meta, body = parse_front_matter(path.read_text(encoding="utf-8"))
         posts.append(
@@ -189,7 +255,7 @@ def load_posts() -> list[Post]:
                 summary=meta.get("summary", ""),
                 external_url=meta.get("external_url") or None,
                 content_html=markdown.markdown(body) if body else "",
-                enclosures=build_enclosures(meta, slug),
+                enclosures=build_enclosures(meta, feed),
             )
         )
     posts.sort(key=lambda p: (p.published, p.slug), reverse=True)
@@ -201,23 +267,23 @@ def rfc3339(d: dt.datetime) -> str:
     return s.replace("+00:00", "Z") if d.utcoffset() == dt.timedelta(0) else s
 
 
-def build_feed(posts: list[Post]) -> str:
+def build_feed(feed: Feed, posts: list[Post]) -> str:
     updated = max((p.published for p in posts), default=dt.datetime.now(dt.timezone.utc))
     lines = [
         '<?xml version="1.0" encoding="utf-8"?>',
         '<feed xmlns="http://www.w3.org/2005/Atom">',
-        f"  <title>{escape(FEED_TITLE)}</title>",
-        f"  <id>{escape(FEED_BASE + '/')}</id>",
+        f"  <title>{escape(feed.title)}</title>",
+        f"  <id>{escape(feed.anchor)}</id>",
         f"  <updated>{rfc3339(updated)}</updated>",
-        f'  <link rel="self" href={quoteattr(FEED_BASE + FEED_PATH)}/>',
-        f"  <logo>{escape(FEED_LOGO)}</logo>",
-        f"  <icon>{escape(FEED_LOGO)}</icon>",
-        f"  <author><name>{escape(FEED_AUTHOR)}</name></author>",
+        f'  <link rel="self" href={quoteattr(feed.url)}/>',
+        f"  <logo>{escape(feed.logo_url)}</logo>",
+        f"  <icon>{escape(feed.logo_url)}</icon>",
+        f"  <author><name>{escape(feed.author)}</name></author>",
     ]
     for p in posts:
         lines.append("  <entry>")
         lines.append(f"    <title>{escape(p.title)}</title>")
-        lines.append(f"    <id>urn:uuid:{p.entry_id}</id>")
+        lines.append(f"    <id>urn:uuid:{entry_id(feed, p.slug)}</id>")
         lines.append(f"    <updated>{rfc3339(p.published)}</updated>")
         lines.append(f"    <published>{rfc3339(p.published)}</published>")
         if p.summary:
@@ -236,11 +302,109 @@ def build_feed(posts: list[Post]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> int:
-    posts = load_posts()
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(build_feed(posts), encoding="utf-8")
-    print(f"ok: {len(posts)} post(s) → {OUTPUT}")
+def check_attached(feed: Feed, text: str) -> None:
+    """Vedhæftede feeds skal være gyldig XML med korrekt self-link."""
+    try:
+        root = ElementTree.fromstring(text)
+    except ElementTree.ParseError as e:
+        raise ValueError(f"{feed.key}: {feed.source} er ikke gyldig XML ({e})")
+    link = root.find("./channel/{http://www.w3.org/2005/Atom}link[@rel='self']")
+    href = link.get("href") if link is not None else None
+    if href != feed.url:
+        raise ValueError(
+            f'{feed.key}: <atom:link rel="self"> peger på {href!r}, forventet '
+            f"{feed.url!r} — ret det i {feed.source}"
+        )
+
+
+def build_nginx_conf(feeds: tuple[Feed, ...]) -> str:
+    """nginx sender text/xml for .xml — Content-Type sættes pr. feed her."""
+    lines = [
+        "# GENERERET af build.py ud fra FEEDS — redigér registry'et i stedet.",
+        "server {",
+        "    listen 80;",
+        "    server_name _;",
+        "    root /usr/share/nginx/html;",
+        "    index index.html;",
+        "    include /etc/nginx/mime.types;",
+        "",
+    ]
+    for feed in feeds:
+        lines += [
+            f"    location = {feed.path} {{",
+            f"        types {{ {feed.content_type} xml; }}",
+            f"        default_type {feed.content_type};",
+            "    }",
+        ]
+    lines += [
+        "",
+        "    location ~* \\.m4a$ {",
+        "        types { audio/mp4 m4a; }",
+        "        default_type audio/mp4;",
+        "    }",
+        "",
+        "    location / {",
+        "        try_files $uri =404;",
+        "    }",
+        "}",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def build_feed_file(feed: Feed) -> int:
+    """Skriver feedets artefakt i k8s/ og returnerer antal poster (0 for attached)."""
+    out = Path(feed.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if feed.kind == "generated":
+        posts = load_posts(feed)
+        out.write_text(build_feed(feed, posts), encoding="utf-8")
+        return len(posts)
+    if feed.kind == "attached":
+        text = Path(feed.source).read_text(encoding="utf-8")
+        check_attached(feed, text)
+        out.write_text(text, encoding="utf-8")
+        return 0
+    raise ValueError(f"{feed.key}: ukendt kind {feed.kind!r} (brug 'generated' eller 'attached')")
+
+
+def validate_registry(feeds: tuple[Feed, ...]) -> None:
+    for attr in ("key", "path", "output"):
+        seen = [getattr(f, attr) for f in feeds]
+        if len(seen) != len(set(seen)):
+            raise ValueError(f"FEEDS: {attr} skal være unik pr. feed")
+    for feed in feeds:
+        if feed.kind == "generated" and not feed.content_dir:
+            raise ValueError(f"{feed.key}: generated feed mangler content_dir")
+        if feed.kind == "attached" and not feed.source:
+            raise ValueError(f"{feed.key}: attached feed mangler source")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="higgs: byg alle feeds i FEEDS")
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="skriv feeds som TSV (key, url, content_type, title) og afslut",
+    )
+    args = parser.parse_args(argv)
+    validate_registry(FEEDS)
+
+    if args.list:
+        for feed in FEEDS:
+            print("\t".join([feed.key, feed.url, feed.content_type, feed.title]))
+        return 0
+
+    for feed in FEEDS:
+        n = build_feed_file(feed)
+        detail = f"{n} post(s)" if feed.kind == "generated" else f"vedhæftet {feed.source}"
+        print(f"ok: {feed.key} → {feed.output} ({detail})")
+
+    # Alle artefakter skal kunne parses, før de ryger i en ConfigMap.
+    for feed in FEEDS:
+        ElementTree.parse(feed.output)
+
+    NGINX_CONF.write_text(build_nginx_conf(FEEDS), encoding="utf-8")
+    print(f"ok: nginx-Content-Type for {len(FEEDS)} feed(s) → {NGINX_CONF}")
     return 0
 
 
