@@ -105,6 +105,16 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 - **Verifikation:** `make verify` parser alle feeds; `scripts/deploy.sh`
   verificerer HTTP 200 + Content-Type + titel for alle feeds via
   `python3 build.py --list`.
+- **Import af nye bøger:** `scripts/import-librivox.py --theme <tema> --rss
+  <librivox-rss>` (eller `--item <archive.org-id>`) gør hele kæden: metadata,
+  download fra item'ets egen host med md5-verifikation, medier i
+  `media/<tema>/<bog>/`, poster i `content/<tema>/<bog>/` og indsættelse i
+  registry'et + k8s-manifesterne. **Redigér ikke de markerede
+  `importerede feeds`-blokke i hånden** — de vedligeholdes af scriptet
+  (`build.py`: FEEDS; `k8s/kustomization.yaml`: configMapGenerator;
+  `k8s/deployment.yaml`: volumeMounts + volumes). Kapitel 1 får nyeste dato,
+  så lister står i læserækkefølge; `--oldest-first`, `--variant`, `--date`,
+  `--dry-run` er flag.
 - **Deployet:** `/tao/lieh-tzu/feed.xml` er live (HTTP 200,
   `application/rss+xml`) og byte-identisk med repoets fil; rod-feedet er
   uændret inkl. IPFS-enclosure.

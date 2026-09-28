@@ -114,7 +114,29 @@ stedet for på et subdomæne pr. bog: nye bøger kræver hverken DNS-record elle
 cert. Vil man have et tema på eget subdomæne (`tao.higgs.gihc.online`), er det
 én linje i `FEEDS` plus en DNS-record og en ingress-regel.
 
-Sådan tilføjer du en genereret bog (normalt vejen):
+Sådan importerer du en LibriVox-bog (den normale vej):
+
+```bash
+scripts/import-librivox.py --theme tao --book zhuangzi \
+  --rss https://librivox.org/rss/XXXX     # eller --item <archive.org-id>
+scripts/deploy.sh --sync-media
+```
+
+[scripts/import-librivox.py](scripts/import-librivox.py) henter metadata og
+filer fra archive.org — via item'ets egen host, ikke `www.archive.org/download/…`,
+hvis downloadnode svarer 500 — og verificerer hver fil mod arkivets md5.
+Den lægger medierne i `media/<tema>/<bog>/`, skriver
+`content/<tema>/<bog>/<dato>-NN-<kapitel>.md` og indsætter feedet i registry'et
+samt i `k8s/kustomization.yaml` og `k8s/deployment.yaml` — altid i de markerede
+`importerede feeds`-blokke, så indsættelsen er idempotent og let at revidere.
+Til sidst kører den `build.py` og `kubectl kustomize` som egenkontrol.
+
+Kapitel 1 får den nyeste dato (23:00 og bagud, ét minut pr. kapitel), så listen
+står i læserækkefølge i klienter der viser nyeste øverst — brug `--oldest-first`
+for det modsatte. `--variant vbr|ogg` vælger en anden lydudgave, `--date`
+overstyrer basisdatoen, og `--dry-run` viser planen uden at hente noget.
+
+Sådan tilføjer du en genereret bog i hånden (kilder uden LibriVox-metadata):
 
 1. Læg medierne i `media/<tema>/<bog>/` (gitignoreret — uploades med
    `scripts/deploy.sh --sync-media`).
@@ -169,6 +191,7 @@ higgs/
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
 │   ├── deploy.sh             # tunnel + byg + apply + verificér (--sync-media/--sync-ipfs)
+│   ├── import-librivox.py    # importér en LibriVox-bog (medier + poster + registry)
 │   ├── sync-ipfs.sh          # pin media/ i gateway-pod'en (wrap-mappe-CIDs)
 │   └── create-dns-record.sh  # A-record hos Simply.com — IP som arg eller udledt fra zonen
 ├── build.py                  # registry (FEEDS) + generator: content/ + feeds/ → k8s/

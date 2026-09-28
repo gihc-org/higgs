@@ -1,7 +1,8 @@
 ---
 title: Effort & Destiny
 date: 2007-10-03T01:00:00Z
-summary: "Kapitel 7: Effort & Destiny (10:27). Indlæst af LibriVox — indspilningen er i public domain."
+summary: Kapitel 7: Effort & Destiny (10:27). Indlæst af LibriVox — indspilningen er i public domain.
+source: https://librivox.org/rss/1263
 media:
   - src: media/tao/lieh-tzu/liehtzu_06_tzu_64kb.mp3
     type: audio/mpeg

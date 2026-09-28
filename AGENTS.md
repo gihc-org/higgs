@@ -53,6 +53,9 @@ beskyt de tre neutralitets-ankre:
   `~/.kube/gihc.yml` — se `scripts/deploy.sh`). Verificér altid efter deploy:
   HTTP 200, `Content-Type: application/atom+xml`, gyldigt
   letsencrypt-cert (`curl -sS https://higgs.gihc.online/feed.xml`).
+- **Nye bøger importeres med `scripts/import-librivox.py`**; den skriver kun i
+  de markerede `importerede feeds`-blokke i `build.py` og `k8s/`. Redigér
+  aldrig de blokke i hånden, og flyt ikke markørerne.
 - **Eksterne skridt med brugerens credentials** (pass, SSH-passphrase,
   GitHub-push, DNS-ændringer): udføres af brugeren eller med eksplicit
   godkendelse.

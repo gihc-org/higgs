@@ -94,6 +94,24 @@
       nginx-enclosure'en pr. afsnit, så afspilning er upåvirket. Alternativ:
       gør IPFS-enclosures tilvalg (fx flag), så feedet ikke annoncerer en sti,
       der ikke svarer
+- [x] **`scripts/import-librivox.py`** — formaliseret import af LibriVox-bøger:
+      læser RSS eller archive.org-item, henter metadata via metadata-API'et,
+      downloader fra item'ets egen host (ikke `www.archive.org/download/…`) med
+      md5-verifikation, lægger medier i `media/<tema>/<bog>/`, skriver
+      `content/<tema>/<bog>/<dato>-NN-<kapitel>.md` og indsætter feedet i
+      registry'et + `kustomization.yaml` + `deployment.yaml`. Egenkontrol til
+      sidst (`build.py` + `kubectl kustomize`). Testet end-to-end i en kopi af
+      repoet: medier genbrugt via md5, cover hentet, 8 poster skrevet,
+      indsættelser korrekte, egenkontrol grøn. `--dry-run`, `--variant`,
+      `--date` og `--oldest-first` findes.
+- [x] Markerede **`importerede feeds`-blokke** i `build.py`,
+      `k8s/kustomization.yaml` og `k8s/deployment.yaml` (mounts + volumes).
+      Egenkontrollen fangede undervejs at 8-space-slutmarkøren var en delstreng
+      af 12-space-markøren, så blokken røg i den forkerte liste — markørerne er
+      nu sektionsnavngivne og matches som hele linjer.
+- [x] Lieh-Tzu-summaries: overflødige citationstegn fjernet + `source:`-linje
+      tilføjet (samme form som importøren skriver). Entry-id'er og rækkefølge
+      uændrede — kræver blot et nyt deploy for at slå igennem live.
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 
