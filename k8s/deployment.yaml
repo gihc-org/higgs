@@ -44,20 +44,24 @@ spec:
               mountPath: /usr/share/nginx/html/logo.png
               subPath: logo.png
               readOnly: true
-            # Vedhæftede feeds (build.py: FEEDS) monteres på deres URL-sti.
+            # Importerede feeds (build.py: FEEDS) monteres på deres URL-sti.
+            # >>> importerede feeds (volumeMounts) — vedligeholdes af scripts/import-librivox.py >>>
             - name: feed-tao-lieh-tzu
               mountPath: /usr/share/nginx/html/tao/lieh-tzu/feed.xml
               subPath: feed.xml
               readOnly: true
+            # <<< importerede feeds (volumeMounts) <<<
             - name: media
               mountPath: /usr/share/nginx/html/media
       volumes:
         - name: feed
           configMap:
             name: higgs-feed
+        # >>> importerede feeds (volumes) — vedligeholdes af scripts/import-librivox.py >>>
         - name: feed-tao-lieh-tzu
           configMap:
             name: higgs-feed-tao-lieh-tzu
+        # <<< importerede feeds (volumes) <<<
         - name: media
           persistentVolumeClaim:
             claimName: higgs-media

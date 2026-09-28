@@ -95,6 +95,8 @@ FEEDS: tuple[Feed, ...] = (
         output="k8s/feed.xml",
         content_dir="content/higgs",
     ),
+    # >>> importerede feeds (FEEDS) — vedligeholdes af scripts/import-librivox.py >>>
+    # kilde: https://librivox.org/rss/1263 (LibriVox, public domain)
     Feed(
         key="tao/lieh-tzu",
         path="/tao/lieh-tzu/feed.xml",
@@ -122,6 +124,7 @@ FEEDS: tuple[Feed, ...] = (
             "— From Lionel Giles' introduction"
         ),
     ),
+    # <<< importerede feeds (FEEDS) <<<
 )
 
 
