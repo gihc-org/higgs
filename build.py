@@ -65,6 +65,7 @@ class Feed:
     content_dir: str | None = None  # generated: mappe med markdown-poster
     source: str | None = None  # attached: XML-fil i repoet
     logo: str = "/logo.png"  # absolut URL eller sti på SITE_BASE
+    subtitle: str = ""  # Atom <subtitle> — feedets beskrivelse
 
     @property
     def url(self) -> str:
@@ -99,10 +100,27 @@ FEEDS: tuple[Feed, ...] = (
         path="/tao/lieh-tzu/feed.xml",
         title="Book of Lieh-Tzu, The by Liezi ( - ca. 400 BC)",
         author="LibriVox",
-        kind="attached",
+        kind="generated",
         output="k8s/feeds/tao/lieh-tzu/feed.xml",
-        content_type=RSS,
-        source="feeds/tao/lieh-tzu/feed.xml",
+        content_dir="content/tao/lieh-tzu",
+        # Coveret ligger på PVC'en (media/ er gitignoreret) og serveres af nginx.
+        logo="/media/tao/lieh-tzu/cover.jpg",
+        subtitle=(
+            "Lionel Giles' engelske oversættelse af The Book of Lieh-Tzu, indlæst "
+            "af LibriVox (public domain). "
+            "Although Lieh Tzu's work has evidently passed through the hands of "
+            "many editors and gathered numerous accretions, there remains a "
+            "considerable nucleus which in all probability was committed to "
+            "writing by Lieh Tzu's immediate disciples, and is therefore older "
+            "than the genuine parts of Chuang Tzu. There are some obvious "
+            "analogies between the two authors, and indeed a certain amount of "
+            "matter common to both; but on the whole Lieh Tzu's book bears an "
+            "unmistakable impress of its own. The geniality of its tone contrasts "
+            "with the somewhat hard brilliancy of Chuang Tzu, and a certain kindly "
+            "sympathy with the aged, the poor and the humble of this life, not "
+            "excluding the brute creation, makes itself felt throughout. "
+            "— From Lionel Giles' introduction"
+        ),
     ),
 )
 
@@ -181,7 +199,12 @@ def post_datetime(meta: dict, slug: str) -> dt.datetime:
     )
 
 
-def build_enclosures(meta: dict, feed: Feed) -> list[dict]:
+def build_enclosures(meta: dict) -> list[dict]:
+    """Enclosure-URL'er ud fra `src:` i front matter.
+
+    `src:` er altid relativ til domæneroden (fx `media/tao/lieh-tzu/fil.mp3`),
+    fordi nginx serverer `/media/…` fra PVC'en — ikke fra feedets mappe.
+    """
     out = []
     for item in meta.get("media", []):
         src = item.get("src")
@@ -196,7 +219,7 @@ def build_enclosures(meta: dict, feed: Feed) -> list[dict]:
             {
                 "type": mime,
                 "length": p.stat().st_size,
-                "href": f"{feed.anchor}{src}",
+                "href": f"{SITE_BASE}/{src}",
             }
         )
         cid = ipfs_wrap_dir_cid(p)
@@ -255,7 +278,7 @@ def load_posts(feed: Feed) -> list[Post]:
                 summary=meta.get("summary", ""),
                 external_url=meta.get("external_url") or None,
                 content_html=markdown.markdown(body) if body else "",
-                enclosures=build_enclosures(meta, feed),
+                enclosures=build_enclosures(meta),
             )
         )
     posts.sort(key=lambda p: (p.published, p.slug), reverse=True)
@@ -273,6 +296,10 @@ def build_feed(feed: Feed, posts: list[Post]) -> str:
         '<?xml version="1.0" encoding="utf-8"?>',
         '<feed xmlns="http://www.w3.org/2005/Atom">',
         f"  <title>{escape(feed.title)}</title>",
+    ]
+    if feed.subtitle:
+        lines.append(f"  <subtitle>{escape(feed.subtitle)}</subtitle>")
+    lines += [
         f"  <id>{escape(feed.anchor)}</id>",
         f"  <updated>{rfc3339(updated)}</updated>",
         f'  <link rel="self" href={quoteattr(feed.url)}/>',
