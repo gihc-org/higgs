@@ -18,7 +18,7 @@ recorden findes i Simplys API, men serveres ikke af de autoritative
 nameservere (se DNS-afsnittet nedenfor).
 
 Fase 3 (flere feeds) er bygget og **deployet** på branch `feat/flere-feeds`
-(afventer kun `--sync-media`-deploy, genindlæsning i AntennaPod og push):
+(afventer kun genindlæsning i AntennaPod og push):
 `build.py` har nu registry'et `FEEDS`, og Lieh-Tzu ligger på
 `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`. Feedet er undervejs
 konverteret fra vedhæftet RSS til **genereret Atom med selv-hostede medier**
@@ -114,9 +114,15 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
   live feed). `scripts/deploy.sh` henter derfor hele svaret i én request og
   matcher uden pipe. Samme fælde gælder alle `… | grep -q` i scripts med
   `pipefail`.
-- **Afventer:** `scripts/deploy.sh --sync-media` (SSH-passphrase), fjern +
-  genindlæs feedet i AntennaPod (format og entry-id'er har ændret sig) og push
-  af branchen `feat/flere-feeds`.
+- **Deployet:** `scripts/deploy.sh --sync-media` + `--sync-media --sync-ipfs`
+  er kørt. Feedet svarer HTTP 200 + `application/atom+xml`, medierne ligger på
+  PVC'en, og alle ni filer er pinnet i IPFS. Verificeret udefra: enclosure
+  `206 audio/mpeg`, cover `200 image/jpeg`.
+- **IPFS-enclosures er døde indtil videre:** `ipfs.higgs.gihc.online` mangler
+  stadig offentlig DNS (fase 2-blokeringen), så de otte IPFS-links i feedet
+  svarer ikke. De står efter nginx-linket pr. afsnit, og afspilning virker.
+- **Afventer:** fjern + genindlæs `tao/lieh-tzu` i AntennaPod (RSS → Atom giver
+  nye entry-id'er) og push branchen `feat/flere-feeds`.
 
 ## DNS — åben blokering (løses først i næste session)
 

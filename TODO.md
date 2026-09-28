@@ -80,9 +80,20 @@
       nginx' `/media`-mount), og feeds kan have `<subtitle>` (LibriVox-beskrivelsen)
 - [x] `feeds/tao/lieh-tzu/feed.xml` fjernet (erstattet af de otte markdown-poster);
       `attached`-mekanikken i build.py findes fortsat til tredjeparts-XML
-- [ ] **Afventer bruger:** `scripts/deploy.sh --sync-media` (SSH-passphrase),
-      fjern+genindlæs feedet i AntennaPod (entry-id'er og format har ændret sig),
-      og push branchen `feat/flere-feeds`
+- [x] **Deployet** (`scripts/deploy.sh --sync-media` og derefter
+      `--sync-media --sync-ipfs`): tao-feedet svarer HTTP 200 +
+      `application/atom+xml`, medierne ligger på PVC'en, og alle ni filer
+      (8 kapitler + cover) er pinnet i IPFS med wrap-mappe-CID'er.
+      Verificeret udefra: enclosure `206 audio/mpeg`, cover
+      `200 image/jpeg`
+- [ ] **Afventer bruger:** fjern + genindlæs `tao/lieh-tzu` i AntennaPod (RSS →
+      Atom betyder nye entry-id'er, så de gamle afsnit skal væk), og push
+      branchen `feat/flere-feeds`
+- [ ] **Åbent (fase 2):** IPFS-enclosure-URL'erne i feedet er døde, indtil
+      DNS-blokeringen for `ipfs.higgs.gihc.online` er løst. De ligger efter
+      nginx-enclosure'en pr. afsnit, så afspilning er upåvirket. Alternativ:
+      gør IPFS-enclosures tilvalg (fx flag), så feedet ikke annoncerer en sti,
+      der ikke svarer
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 
