@@ -5,8 +5,12 @@
 KUBECONFIG ?= $(HOME)/.kube/gihc.yml
 export KUBECONFIG
 
+# deploy.sh sætter BUILD_FLAGS=--strict-media, så et deploy afbrydes hvis
+# medierne mangler lokalt. Til manuel inspektion kan den stå tom.
+BUILD_FLAGS ?=
+
 build:
-	python3 build.py
+	python3 build.py $(BUILD_FLAGS)
 	cp logo/logo-symmetrisk.svg k8s/logo.svg
 	convert -background white -density 300 logo/logo-symmetrisk.svg -resize '1024x1024>' -gravity center -extent 1024x1024 -strip k8s/logo.png
 

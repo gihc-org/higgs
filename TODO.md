@@ -120,6 +120,12 @@
       artefakt — git gemmer ikke tomme mapper. `build.py` opretter nu mappen
       selv, som den allerede gør for feed-artefakterne.
       **Lærdom: verificér i en frisk clone, ikke kun i arbejdstræet.**
+- [x] **Spærring mod manglende medier:** `build.py --strict-media` fejler
+      (exit 2) med listen af manglende filer, og `deploy.sh` bruger altid den
+      variant — så et deploy ikke kan fjerne enclosure-links i stilhed.
+      Undtagelsen er `--allow-missing-media`. `make build` uden flag er fortsat
+      tilladende, så et checkout kan inspiceres; `Makefile` sender `BUILD_FLAGS`
+      videre.
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 

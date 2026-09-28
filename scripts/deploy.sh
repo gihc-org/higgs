@@ -2,9 +2,15 @@
 # higgs — byg, deploy og verificér feedet i ét kald.
 #
 # Brug:
-#   scripts/deploy.sh               # byg + apply + vent på rollout + verificér
-#   scripts/deploy.sh --sync-media  # ovenstående + upload lokalt media/ til PVC
-#   scripts/deploy.sh --sync-ipfs   # ovenstående + pin medier i IPFS-gatewayen
+#   scripts/deploy.sh                 # byg + apply + vent på rollout + verificér
+#   scripts/deploy.sh --sync-media    # ovenstående + upload lokalt media/ til PVC
+#   scripts/deploy.sh --sync-ipfs     # ovenstående + pin medier i IPFS-gatewayen
+#   scripts/deploy.sh --allow-missing-media  # byg alligevel uden lokale medier
+#
+# Medier er ikke i git, så et friskt checkout har dem ikke — og feedet ville
+# blive udgivet uden enclosure-links. Derfor bygges der med --strict-media, og
+# deployet afbryder, hvis en mediefil mangler. --allow-missing-media er den
+# bevidste undtagelse.
 #
 # Kræver: SSH-alias 'hetzner-k3s', kubectl, make, curl.
 # SSH-tunnelen (6443) åbnes automatisk, hvis porten ikke svarer lokalt.
@@ -22,14 +28,22 @@ TUNNEL_CMD=(ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes \
 
 SYNC_MEDIA=0
 SYNC_IPFS=0
+ALLOW_MISSING_MEDIA=0
 for arg in "$@"; do
     case "$arg" in
         --sync-media) SYNC_MEDIA=1 ;;
         --sync-ipfs) SYNC_IPFS=1 ;;
-        -h|--help) sed -n '2,9p' "$0"; exit 0 ;;
+        --allow-missing-media) ALLOW_MISSING_MEDIA=1 ;;
+        -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
         *) echo "ukendt argument: $arg (se --help)" >&2; exit 2 ;;
     esac
 done
+
+BUILD_FLAGS="--strict-media"
+if [ "$ALLOW_MISSING_MEDIA" = 1 ]; then
+    BUILD_FLAGS=""
+    echo "advarsel: --allow-missing-media — feedet kan blive udgivet uden enclosures" >&2
+fi
 
 for tool in kubectl curl make; do
     command -v "$tool" >/dev/null || { echo "FEJL: $tool mangler i PATH" >&2; exit 1; }
@@ -60,7 +74,7 @@ ensure_tunnel() {
 }
 
 echo "== byg =="
-make verify
+make verify BUILD_FLAGS="$BUILD_FLAGS"
 
 ensure_tunnel
 

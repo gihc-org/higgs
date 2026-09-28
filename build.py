@@ -397,6 +397,26 @@ def build_feed_file(feed: Feed) -> int:
     raise ValueError(f"{feed.key}: ukendt kind {feed.kind!r} (brug 'generated' eller 'attached')")
 
 
+def missing_media(feeds: tuple[Feed, ...]) -> list[str]:
+    """Mediefiler som `src:` peger på, men som ikke findes lokalt.
+
+    Media er ikke i git, så et friskt checkout kan ikke bygge et komplet feed.
+    deploy.sh kører derfor med --strict-media og afbryder, hvis listen ikke er
+    tom — et deploy må aldrig fjerne enclosure-links i stilhed.
+    """
+    missing: list[str] = []
+    for feed in feeds:
+        if feed.kind != "generated" or not feed.content_dir:
+            continue
+        for path in sorted(Path(feed.content_dir).glob("*.md")):
+            meta, _body = parse_front_matter(path.read_text(encoding="utf-8"))
+            for item in meta.get("media", []):
+                src = item.get("src")
+                if src and not Path(src).is_file():
+                    missing.append(src)
+    return missing
+
+
 def validate_registry(feeds: tuple[Feed, ...]) -> None:
     for attr in ("key", "path", "output"):
         seen = [getattr(f, attr) for f in feeds]
@@ -416,6 +436,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="skriv feeds som TSV (key, url, content_type, title) og afslut",
     )
+    parser.add_argument(
+        "--strict-media",
+        action="store_true",
+        help="fejl hvis en mediefil mangler (bruges af deploy.sh)",
+    )
     args = parser.parse_args(argv)
     validate_registry(FEEDS)
 
@@ -423,6 +448,18 @@ def main(argv: list[str] | None = None) -> int:
         for feed in FEEDS:
             print("\t".join([feed.key, feed.url, feed.content_type, feed.title]))
         return 0
+
+    missing = missing_media(FEEDS)
+    if missing and args.strict_media:
+        print(f"FEJL: {len(missing)} mediefil(er) mangler lokalt:", file=sys.stderr)
+        for src in missing:
+            print(f"  - {src}", file=sys.stderr)
+        print(
+            "Stop: feedet ville blive udgivet uden enclosures. Hent medierne "
+            "(media/ er ikke i git), eller byg bevidst uden med --strict-media.",
+            file=sys.stderr,
+        )
+        return 2
 
     for feed in FEEDS:
         n = build_feed_file(feed)

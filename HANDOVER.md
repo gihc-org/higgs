@@ -168,6 +168,9 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 - Deployment bruger `Recreate` (RWO PVC). ConfigMap får content-hash via
   kustomize; `k8s/logo.png` genereres med `-strip`, så hash'en er deterministisk
   (ingen pod-genstart ved uændret indhold).
+- **Deploy afbryder hvis medier mangler:** `deploy.sh` bygger med
+  `--strict-media` (media/ er ikke i git, så et friskt checkout har dem ikke).
+  Undtagelsen er `--allow-missing-media`. `make build` uden flag advarer blot.
 
 ## Logo
 

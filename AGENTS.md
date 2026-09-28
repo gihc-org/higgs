@@ -56,6 +56,9 @@ beskyt de tre neutralitets-ankre:
 - **Nye bøger importeres med `scripts/import-librivox.py`**; den skriver kun i
   de markerede `importerede feeds`-blokke i `build.py` og `k8s/`. Redigér
   aldrig de blokke i hånden, og flyt ikke markørerne.
+- **Deploy afbryder hvis medier mangler.** `scripts/deploy.sh` bygger med
+  `--strict-media`, så et manglende medie (media/ er ikke i git) stopper
+  deployet før klyngen røres. Undtagelsen er `--allow-missing-media`.
 - **Eksterne skridt med brugerens credentials** (pass, SSH-passphrase,
   GitHub-push, DNS-ændringer): udføres af brugeren eller med eksplicit
   godkendelse.

@@ -278,6 +278,10 @@ make build    # feeds → k8s/ + nginx-conf + logo.svg + logo.png
 make verify   # tjekker alle feeds (XML) og logo.png (PNG)
 ```
 
+Medierne er ikke i git, så et friskt checkout bygger et feed **uden
+enclosures** — bygget advarer, og `make build BUILD_FLAGS=--strict-media` gør
+det til en fejl i stedet. `deploy.sh` bruger altid den strenge variant.
+
 ### Deploy
 
 `scripts/deploy.sh` (eller `make deploy`) klarer hele flowet i ét kald: åbner
@@ -289,9 +293,14 @@ er registreret som endpoint.
 
 ```bash
 scripts/deploy.sh
-scripts/deploy.sh --sync-media   # uploader også lokalt media/ til PVC
-scripts/deploy.sh --sync-ipfs    # pinner også medierne i IPFS-gatewayen
+scripts/deploy.sh --sync-media            # uploader også lokalt media/ til PVC
+scripts/deploy.sh --sync-ipfs             # pinner også medierne i IPFS-gatewayen
+scripts/deploy.sh --allow-missing-media   # bevidst undtagelse (frarådet)
 ```
+
+Deployet bygger med `--strict-media`: mangler en fil som `media:` peger på,
+afbrydes det **før** klyngen røres, så et deploy aldrig kan fjerne
+enclosure-links i stilhed. `--allow-missing-media` er den bevidste undtagelse.
 
 Har du ændret medier, skal du bruge `--sync-media` (eller køre
 `make sync-media` bagefter); skal IPFS-enclosure-URL'erne virke, kør
