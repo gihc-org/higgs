@@ -119,11 +119,16 @@ med 2028 (Giles døde 1958) — derfor linker vi frem for at hoste teksten selv.
 En scan med PDF, EPUB og OCR-tekst ligger på
 [archive.org](https://archive.org/details/taoistteachings00liez).
 
-Hvordan klienter læser det (verificeret i AntennaPods kildekode): `<link
-rel="alternate">` bliver episodens *hjemmeside*, som ligger i episodemenuen
-("Besøg hjemmeside"), mens **beskrivelsen** sættes til det længste af
-`<content>` og `<summary>`. Linket står derfor også i selve beskrivelsen — i
-både `content` og `summary` — så det er synligt uden at grave i menuer.
+Hvordan klienter læser det, er efterprøvet i AntennaPods kildekode:
+`<link rel="alternate">` bliver episodens *hjemmeside* (episodemenuen "Besøg
+hjemmeside"), mens **beskrivelsen** sættes til det længste af `<content>` og
+`<summary>`. Vigtigere: AntennaPod koger Atom-tekst til **ren tekst**
+(`AtomText.getProcessedContent()` kører `fromHtml(...).toString()` på
+`type="html"`, og `type="xhtml"` mister tags i SAX-opsamlingen), så `href`
+overlever ikke i beskrivelsen. Derfor står kapitellinket også som en **synlig
+URL** i teksten: AntennaPods `PlainTextLinksConverter` gør bare URL'er
+klikbare i beskrivelsen. Links der skal kunne trykkes på i Atom-feeds, skal
+altså skrives som `<https://…>` — ikke som skjult `href` bag en pæn tekst.
 
 Stien er abonnements-kontrakten og kan ikke laves om bagefter uden at læserne
 skal tilmelde sig igen. Derfor ligger nye feeds under `higgs.gihc.online` i

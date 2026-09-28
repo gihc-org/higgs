@@ -157,6 +157,16 @@
       (`setDescriptionIfLonger`). Linket er derfor nu også i beskrivelsen (både
       `content` og `summary`) — `content` er fortsat længst, så det er den
       AntennaPod viser. **Vigtig viden om klienter.**
+- [x] **Linket var stadig ikke klikbart i AntennaPod.** Næste led i kæden
+      fundet i kildekoden: `AtomText.getProcessedContent()` kører
+      `HtmlCompat.fromHtml(...).toString()` på `type="html"` (og `type="xhtml"`
+      mister tags i `SyndHandler`s SAX-opsamling), så **al markup — inkl.
+      `href` — strippes** fra Atom-beskrivelser. Bagefter linkificerer
+      `PlainTextLinksConverter` (regex i `ui/cleaner/`) bare URL'er i teksten.
+      Derfor står kapitellinket nu som `<https://…>` i både `content` og
+      `summary`: ankerets tekst *er* URL'en, så den overlever som synlig tekst
+      og bliver klikbar. Verificeret med en simulering af AntennaPods
+      behandling for alle otte afsnit. **Vigtig viden om Atom + AntennaPod.**
 - [ ] **Afventer bruger:** push + `scripts/deploy.sh`; derefter genindlæses
       feedet i AntennaPod (ingen ny tilmelding nødvendig — entry-id'er og
       datoer er uændrede)
