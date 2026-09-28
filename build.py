@@ -124,6 +124,26 @@ FEEDS: tuple[Feed, ...] = (
             "— From Lionel Giles' introduction"
         ),
     ),
+    # kilde: https://librivox.org/rss/12948
+    Feed(
+        key="tao/sayings-of-lao-tzu",
+        path="/tao/sayings-of-lao-tzu/feed.xml",
+        title="Sayings of Lao Tzu, The by Lao Tzu ( - c. 550 BCE)",
+        author="LibriVox",
+        kind="generated",
+        output="k8s/feeds/tao/sayings-of-lao-tzu/feed.xml",
+        content_dir="content/tao/sayings-of-lao-tzu",
+        logo="/media/tao/sayings-of-lao-tzu/cover.jpg",
+        subtitle=(
+            "Lao-Tzu, also known as Laozi was a Chinese philosopher believed to have "
+            "lived in the 6th century BCE and is credited with writing the "
+            "Tao-Te-Ching which centers around the idea that the way of virtue lies "
+            "in simplicity and a recognition of a natural, universal force known as "
+            "the Tao. He is traditionally regarded as the founder of Taoism. This "
+            "book is a compilation of his most profound writings translated directly "
+            "from ancient Chinese texts. - Summary by Nemo"
+        ),
+    ),
     # <<< importerede feeds (FEEDS) <<<
 )
 

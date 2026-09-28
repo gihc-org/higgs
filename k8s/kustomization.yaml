@@ -21,4 +21,7 @@ configMapGenerator:
   - name: higgs-feed-tao-lieh-tzu
     files:
       - feeds/tao/lieh-tzu/feed.xml
+  - name: higgs-feed-tao-sayings-of-lao-tzu
+    files:
+      - feeds/tao/sayings-of-lao-tzu/feed.xml
   # <<< importerede feeds (configMapGenerator) <<<
