@@ -254,7 +254,7 @@
 - [x] Registry `FEEDS` i build.py: per-feed URL-sti, type og indholdskilde
 - [x] Én ConfigMap pr. feed + mount på feedets URL-sti
 - [x] Vedhæftet Lieh-Tzu-RSS på `/tao/lieh-tzu/feed.xml` — afventer deploy
-- [ ] Flere bøger under `tao` (samme vedhæftede flow)
+- [ ] Flere bøger under `tao` (via `scripts/import-librivox.py`)
 - [ ] Næste tema efter `tao`
 - [ ] Evt. browsbar forside med listen af feeds (variant B — ikke besluttet)
 

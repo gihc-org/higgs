@@ -241,7 +241,7 @@ curl -sS https://higgs.gihc.online/feed.xml | head
 # forvent: HTTP 200, Content-Type: application/atom+xml, gyldigt LE-cert
 curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
   https://higgs.gihc.online/tao/lieh-tzu/feed.xml
-# forvent: HTTP 200 application/rss+xml (vedhæftet Lieh-Tzu-feed)
+# forvent: HTTP 200 application/atom+xml (genereret Lieh-Tzu-feed)
 curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
   https://ipfs.higgs.gihc.online/ipfs/bafybeig4lawleiugo5hsagvt6ubgrj7qqdkajjvthmmpr7xr4jqapvgdyu/episode.m4a
 # forvent (når DNS er løst): HTTP 200 audio/mp4
