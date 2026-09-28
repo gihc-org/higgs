@@ -149,8 +149,17 @@
       og Richard Wilhelms tyske oversættelse fra 1911 (Wilhelm d. 1930).
       Samme nuance gælder lyden: LibriVox' PD-erklæring bygger på amerikansk
       ret.
-- [ ] **Afventer bruger:** push + `scripts/deploy.sh` (så linkene slår igennem
-      live; ingen ny tilmelding nødvendig i AntennaPod)
+- [x] **Linket skulle også i beskrivelsen.** AntennaPod viste ikke teksten, selv
+      om feedet havde `<link rel="alternate">`. Årsag fundet i AntennaPods
+      kildekode (`parser/feed/.../namespace/Atom.java`): `rel="alternate"`
+      gemmes som episodens *hjemmeside* (⋮-menuen → "Besøg hjemmeside"), mens
+      beskrivelsen sættes til **det længste af `<content>` og `<summary>`**
+      (`setDescriptionIfLonger`). Linket er derfor nu også i beskrivelsen (både
+      `content` og `summary`) — `content` er fortsat længst, så det er den
+      AntennaPod viser. **Vigtig viden om klienter.**
+- [ ] **Afventer bruger:** push + `scripts/deploy.sh`; derefter genindlæses
+      feedet i AntennaPod (ingen ny tilmelding nødvendig — entry-id'er og
+      datoer er uændrede)
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 

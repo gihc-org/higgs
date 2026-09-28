@@ -107,6 +107,10 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
   beskyttet i DK/EU til udgangen af 2028 (Giles d. 1958) — derfor linker vi i
   stedet for at hoste. PD-overalt-alternativer: den kinesiske original og
   Richard Wilhelms tyske 1911-oversættelse.
+- **Klient-viden (kostede en runde):** AntennaPod lægger `rel="alternate"` i
+  episodens *hjemmeside* (⋮-menuen), mens beskrivelsen er det **længste** af
+  `<content>` og `<summary>`. Links der skal være synlige, hører derfor i
+  beskrivelsen — ikke kun i `external_url`.
 - **`src:` i front matter er relativ til domæneroden** (`media/<sti>`), ikke til
   feedets URL-sti — det matcher nginx' `/media`-mount mod PVC'en.
 - **k8s:** én ConfigMap pr. feed (`higgs-feed`, `higgs-feed-tao-lieh-tzu`),

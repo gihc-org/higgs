@@ -119,6 +119,12 @@ med 2028 (Giles døde 1958) — derfor linker vi frem for at hoste teksten selv.
 En scan med PDF, EPUB og OCR-tekst ligger på
 [archive.org](https://archive.org/details/taoistteachings00liez).
 
+Hvordan klienter læser det (verificeret i AntennaPods kildekode): `<link
+rel="alternate">` bliver episodens *hjemmeside*, som ligger i episodemenuen
+("Besøg hjemmeside"), mens **beskrivelsen** sættes til det længste af
+`<content>` og `<summary>`. Linket står derfor også i selve beskrivelsen — i
+både `content` og `summary` — så det er synligt uden at grave i menuer.
+
 Stien er abonnements-kontrakten og kan ikke laves om bagefter uden at læserne
 skal tilmelde sig igen. Derfor ligger nye feeds under `higgs.gihc.online` i
 stedet for på et subdomæne pr. bog: nye bøger kræver hverken DNS-record eller
