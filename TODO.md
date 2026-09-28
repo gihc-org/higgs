@@ -115,6 +115,11 @@
 - [x] Lieh-Tzu-summaries: overflødige citationstegn fjernet + `source:`-linje
       tilføjet (samme form som importøren skriver). Entry-id'er og rækkefølge
       uændrede — kræver blot et nyt deploy for at slå igennem live.
+- [x] **Fejl efter merge:** `make build` fejlede i et friskt checkout, fordi
+      `k8s/nginx/` forsvandt, da `default.conf` blev et genereret (untracked)
+      artefakt — git gemmer ikke tomme mapper. `build.py` opretter nu mappen
+      selv, som den allerede gør for feed-artefakterne.
+      **Lærdom: verificér i en frisk clone, ikke kun i arbejdstræet.**
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 

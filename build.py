@@ -433,6 +433,9 @@ def main(argv: list[str] | None = None) -> int:
     for feed in FEEDS:
         ElementTree.parse(feed.output)
 
+    # Mappen kan mangle i et friskt checkout: default.conf er et genereret
+    # artefakt og ligger derfor ikke i git (git gemmer ikke tomme mapper).
+    NGINX_CONF.parent.mkdir(parents=True, exist_ok=True)
     NGINX_CONF.write_text(build_nginx_conf(FEEDS), encoding="utf-8")
     print(f"ok: nginx-Content-Type for {len(FEEDS)} feed(s) → {NGINX_CONF}")
     return 0
