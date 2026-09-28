@@ -110,6 +110,15 @@ entry-id'er fortsat bruger feedets egen sti som anker.
 nyeste: podcast-klienter viser normalt nyeste øverst, og dermed står kapitlerne
 i bogens rækkefølge uden at læseren skal ændre sortering.
 
+Hvert afsnit har desuden `external_url` til sit kapitel i den frie
+[Wikisource-udgave](https://en.wikisource.org/wiki/Taoist_teachings_from_the_book_of_Lieh_Tz%C5%AD)
+af Lionel Giles' 1912-oversættelse; generatoren gør det til
+`<link rel="alternate">`. Bemærk ophavsretten: oversættelsen er public domain i
+USA (derfor kan Wikisource og LibriVox bruge den), men beskyttet i DK/EU til og
+med 2028 (Giles døde 1958) — derfor linker vi frem for at hoste teksten selv.
+En scan med PDF, EPUB og OCR-tekst ligger på
+[archive.org](https://archive.org/details/taoistteachings00liez).
+
 Stien er abonnements-kontrakten og kan ikke laves om bagefter uden at læserne
 skal tilmelde sig igen. Derfor ligger nye feeds under `higgs.gihc.online` i
 stedet for på et subdomæne pr. bog: nye bøger kræver hverken DNS-record eller

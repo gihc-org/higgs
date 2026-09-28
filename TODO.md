@@ -133,6 +133,24 @@
       Testet i et friskt clone: cover og ét kapitel hentet, md5 identisk med
       originalen, og gentagne kørsler springer over. (Fandt undervejs samme
       mappe-skal-oprettes-fejl som i build.py — rettet.)
+- [x] **Teksten til Lieh-Tzu:** fundet frit. Den oversættelse LibriVox indlæste
+      er Lionel Giles' 1912-udgave, som ligger komplet på Wikisource
+      (`Taoist teachings from the book of Lieh Tzŭ`, Introduction + Books 1–7)
+      og som scan med PDF/EPUB/OCR på archive.org (`taoistteachings00liez`).
+      Kapitlerne matcher de otte lydfiler 1:1 (verificeret mod kapitlernes
+      første linjer).
+- [x] **`external_url` pr. afsnit:** alle otte Lieh-Tzu-poster linker nu til
+      deres Wikisource-kapitel, så feedet har `<link rel="alternate">` pr.
+      episode. Entry-id'er og rækkefølge er uændrede (kun front matter), og
+      alle otte links svarer HTTP 200.
+      **Ophavsret:** Giles (1875–1958) → PD i USA (1912), men beskyttet i
+      DK/EU til og med 2028; derfor linker vi i stedet for at hoste.
+      PD-overalt-alternativer hvis vi vil hoste selv: den kinesiske original
+      og Richard Wilhelms tyske oversættelse fra 1911 (Wilhelm d. 1930).
+      Samme nuance gælder lyden: LibriVox' PD-erklæring bygger på amerikansk
+      ret.
+- [ ] **Afventer bruger:** push + `scripts/deploy.sh` (så linkene slår igennem
+      live; ingen ny tilmelding nødvendig i AntennaPod)
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 

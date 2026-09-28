@@ -100,6 +100,13 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 - **Rækkefølge:** LibriVox' `pubDate` fandtes ikke i originalen (de var opfundet
   af en AI-assistent). Tiderne er nu vendt om, så kapitel 1 er nyest og listen
   står i bogens rækkefølge i en klient, der viser nyeste øverst.
+- **Teksten:** hvert afsnit har `external_url` til sit kapitel i
+  Wikisource-udgaven af Giles' 1912-oversættelse (Introduction + Books 1–7),
+  som generatoren gør til `<link rel="alternate">`. Scan med PDF/EPUB/OCR:
+  `archive.org/details/taoistteachings00liez`. **Ophavsret:** PD i USA, men
+  beskyttet i DK/EU til udgangen af 2028 (Giles d. 1958) — derfor linker vi i
+  stedet for at hoste. PD-overalt-alternativer: den kinesiske original og
+  Richard Wilhelms tyske 1911-oversættelse.
 - **`src:` i front matter er relativ til domæneroden** (`media/<sti>`), ikke til
   feedets URL-sti — det matcher nginx' `/media`-mount mod PVC'en.
 - **k8s:** én ConfigMap pr. feed (`higgs-feed`, `higgs-feed-tao-lieh-tzu`),
