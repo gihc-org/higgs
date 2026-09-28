@@ -27,10 +27,8 @@
       `higgs.gihc.online` (`/tao/lieh-tzu/feed.xml`) i stedet for et subdomæne
       pr. bog. Ny bog = ingen DNS-record og intet nyt cert. Begrundelse og
       alternativer (A/B/C) står i README → "Flere feeds".
-- [x] **Beslutning (format):** Lieh-Tzu **vedhæftes** som færdig RSS-fil frem
-      for at blive konverteret til genereret Atom nu — det bevarer
-      LibriVox-metadata, `guid`'er og de eksterne archive.org-enclosures.
-      Konvertering til genereret feed er stadig mulig senere (se "Afventer").
+- [x] **Beslutning (format, oprindeligt):** Lieh-Tzu blev først vedhæftet som
+      færdig RSS-fil — se nedenfor, hvor den blev konverteret til genereret Atom
 - [x] Feature-branch `feat/flere-feeds` oprettet (arbejdet ligger her; push
       overlades til brugeren)
 - [x] `build.py`: registry `FEEDS` (genererede + vedhæftede feeds).
@@ -61,12 +59,30 @@
       curl afbrydes med exit 23 midt i svaret (målt 2/10 kørsler mod live).
       Verifikationen henter nu hele svaret i én request uden pipe.
       **Vigtig viden til næste session.**
-- [ ] **Afventer bruger:** tilmeld `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`
-      i AntennaPod, og push branchen `feat/flere-feeds`
-- [ ] **Afventer beslutning:** skal Lieh-Tzu (og kommende bøger) senere
-      konverteres til genererede feeds? Kræver eksterne enclosures med
-      `url`/`length`/`duration` og RSS 2.0 + `itunes:`-output i generatoren —
-      nødvendigt hvis feeds skal i Apple Podcasts (Atom accepteres ikke der)
+- [x] **Afspilning fejlede i AntennaPod (HTTP 500).** Årsag fundet: archive.orgs
+      `www.archive.org/download/…`-URL'er (som LibriVox selv bruger i dag)
+      redirecter til en `dn…`-downloadnode, der svarer 500 (og Cloudflare-fejl i
+      browseren). Item'ets egen host svarede 206 på alle otte filer, så filerne
+      var i behold. Fejlen kom ikke af feed-omskrivningen — originalen bruger
+      samme URL'er.
+- [x] **Beslutning (re-hosting):** de otte kapitler hentes ned (64 kbps, ~85 MB)
+      og hostes selv på PVC'en under `media/tao/lieh-tzu/`; LibriVox' indspilninger
+      er i public domain. Coveret (`cover.jpg`) følger med.
+- [x] **Beslutning (Atom):** tao-feedet konverteres fra vedhæftet RSS til
+      **genereret Atom** fra `content/tao/lieh-tzu/` — nu muligt, fordi vi selv
+      hoster medierne, og `length` beregnes af generatoren. Apple Podcasts
+      kræver fortsat RSS 2.0, hvis det bliver et krav (se README-beslutning).
+- [x] **Beslutning (rækkefølge):** de kunstige LibriVox-`pubDate`-tider vendes om,
+      så kapitel 1 (Editorial & Intro) er nyest. Podcast-klienter viser normalt
+      nyeste øverst, og så står kapitlerne i bogens rækkefølge uden at læseren
+      skal ændre sortering.
+- [x] `build.py`: `src:` i front matter er nu relativ til domæneroden (matcher
+      nginx' `/media`-mount), og feeds kan have `<subtitle>` (LibriVox-beskrivelsen)
+- [x] `feeds/tao/lieh-tzu/feed.xml` fjernet (erstattet af de otte markdown-poster);
+      `attached`-mekanikken i build.py findes fortsat til tredjeparts-XML
+- [ ] **Afventer bruger:** `scripts/deploy.sh --sync-media` (SSH-passphrase),
+      fjern+genindlæs feedet i AntennaPod (entry-id'er og format har ændret sig),
+      og push branchen `feat/flere-feeds`
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 

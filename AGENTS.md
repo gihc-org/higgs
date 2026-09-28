@@ -4,11 +4,11 @@
 
 Et minimalt, statisk Atom-feed på
 [https://higgs.gihc.online/feed.xml](https://higgs.gihc.online/feed.xml).
-Indhold er markdown i `content/` (genererede feeds) og XML i `feeds/`
-(vedhæftede feeds, fx LibriVox-RSS); `build.py` har registry'et `FEEDS` og
-genererer `k8s/feed.xml` + `k8s/feeds/`, som deployes som ConfigMaps
-(kustomize) bag nginx + ingress. Ingen backend, ingen CI, ingen image-build,
-ingen secrets.
+Indhold er markdown i `content/` (genererede feeds); `feeds/` kan bruges til
+vedhæftede XML-feeds (fx tredjeparts-RSS). `build.py` har registry'et `FEEDS`
+og genererer `k8s/feed.xml` + `k8s/feeds/`, som deployes som ConfigMaps
+(kustomize) bag nginx + ingress — medierne ligger på PVC'en. Ingen backend,
+ingen CI, ingen image-build, ingen secrets.
 
 Vendor-neutralitet er designprincippet: **feedet er produktet, hosting er
 udskiftelig.** Læs `README.md` (hvordan/hvorfor), `STRATEGI.md` (den
@@ -29,9 +29,10 @@ oprindelige strategi), `TODO.md` (status/tjekliste) og `HANDOVER.md`
 Du er udvikler/dokumentarist for higgs. Hold løsningen så enkel som muligt og
 beskyt de tre neutralitets-ankre:
 
-1. **Stabile URL'er er kontrakten.** `media/<slug>/<fil>` ændres aldrig.
-   Omdøb/flyt aldrig content-filer — filnavnet er slug'en og entry-id'et
-   (`uuid5`), så ændringer markerer gamle poster som nye for læsere.
+1. **Stabile URL'er er kontrakten.** `media/<slug>/<fil>` — og
+   `media/<tema>/<bog>/<fil>` — ændres aldrig. Omdøb/flyt aldrig
+   content-filer; filnavnet er slug'en og entry-id'et (`uuid5`), så ændringer
+   markerer gamle poster som nye for læsere.
 2. **Ét sted for feed-URL'er.** `SITE_BASE` + registry'et `FEEDS` i
    `build.py` er det eneste sted, domænet og feed-stierne lever.
    Domæne-/host-skift er én linje + ingress.

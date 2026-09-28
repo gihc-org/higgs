@@ -18,12 +18,13 @@ recorden findes i Simplys API, men serveres ikke af de autoritative
 nameservere (se DNS-afsnittet nedenfor).
 
 Fase 3 (flere feeds) er bygget og **deployet** på branch `feat/flere-feeds`
-(afventer kun push + test i AntennaPod): `build.py` har nu registry'et `FEEDS`,
-og Lieh-Tzu ligger som **vedhæftet** RSS-feed på
-`https://higgs.gihc.online/tao/lieh-tzu/feed.xml` — HTTP 200,
-`application/rss+xml`, byte-identisk med `feeds/tao/lieh-tzu/feed.xml`.
-Rod-feedets entry-id'er er verificeret byte-identiske efter omlægningen, så
-eksisterende lyttere er upåvirkede.
+(afventer kun `--sync-media`-deploy, genindlæsning i AntennaPod og push):
+`build.py` har nu registry'et `FEEDS`, og Lieh-Tzu ligger på
+`https://higgs.gihc.online/tao/lieh-tzu/feed.xml`. Feedet er undervejs
+konverteret fra vedhæftet RSS til **genereret Atom med selv-hostede medier**
+(`content/tao/lieh-tzu/` + `media/tao/lieh-tzu/`). Rod-feedets entry-id'er er
+verificeret byte-identiske efter omlægningen, så eksisterende lyttere er
+upåvirkede.
 
 ## Sådan arbejder vi (kort version — fulde regler i AGENTS.md)
 
@@ -85,10 +86,19 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
   eksterne archive.org-enclosures). Vedhæftede feeds kopieres uændret til
   `k8s/feeds/<key>/feed.xml`; build fejler, hvis `<atom:link rel="self">` ikke
   matcher registry'et.
-- **Lieh-Tzu** ligger i `feeds/tao/lieh-tzu/feed.xml` med self-link på
-  `https://higgs.gihc.online/tao/lieh-tzu/feed.xml`. Filen er den rettede
-  LibriVox-RSS (pubDate + guid pr. episode, så bogens rækkefølge holder i
-  AntennaPod). Cover og lyd ligger fortsat på archive.org — intet medie hostes.
+- **Lieh-Tzu (endelig form):** genereret Atom fra `content/tao/lieh-tzu/` (otte
+  kapitler) med medierne på PVC'en i `media/tao/lieh-tzu/` (8 × 64 kbps mp3 +
+  cover.jpg). Enclosure-URL'erne peger derfor på vores eget domæne.
+  **Baggrund:** feedet var først vedhæftet RSS med LibriVox' egne
+  `www.archive.org/download/…`-URL'er; de begyndte at svare HTTP 500
+  (`dn…`-downloadnoden fejlede, og browseren fik Cloudflare-fejl). Originalen
+  bruger samme URL'er, så fejlen kom ikke af omskrivningen. LibriVox'
+  indspilninger er i public domain.
+- **Rækkefølge:** LibriVox' `pubDate` fandtes ikke i originalen (de var opfundet
+  af en AI-assistent). Tiderne er nu vendt om, så kapitel 1 er nyest og listen
+  står i bogens rækkefølge i en klient, der viser nyeste øverst.
+- **`src:` i front matter er relativ til domæneroden** (`media/<sti>`), ikke til
+  feedets URL-sti — det matcher nginx' `/media`-mount mod PVC'en.
 - **k8s:** én ConfigMap pr. feed (`higgs-feed`, `higgs-feed-tao-lieh-tzu`),
   monteret på feedets sti i nginx-pod'en. `k8s/nginx/default.conf` genereres nu
   af `build.py` (Content-Type pr. feed) og er gitignoreret som artefakt.
@@ -104,8 +114,9 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
   live feed). `scripts/deploy.sh` henter derfor hele svaret i én request og
   matcher uden pipe. Samme fælde gælder alle `… | grep -q` i scripts med
   `pipefail`.
-- **Afventer:** tilmelding af `/tao/lieh-tzu/feed.xml` i AntennaPod og push af
-  branchen `feat/flere-feeds`.
+- **Afventer:** `scripts/deploy.sh --sync-media` (SSH-passphrase), fjern +
+  genindlæs feedet i AntennaPod (format og entry-id'er har ændret sig) og push
+  af branchen `feat/flere-feeds`.
 
 ## DNS — åben blokering (løses først i næste session)
 

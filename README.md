@@ -2,7 +2,7 @@
 
 Et helt simpelt statisk Atom-feed, live på
 [https://higgs.gihc.online/feed.xml](https://higgs.gihc.online/feed.xml).
-Ved siden af det ligger vedhæftede RSS-feeds pr. bog/tema, fx
+Ved siden af det ligger flere feeds pr. bog/tema, fx
 [https://higgs.gihc.online/tao/lieh-tzu/feed.xml](https://higgs.gihc.online/tao/lieh-tzu/feed.xml).
 
 Status: **fase 1 i drift.** Feedet er deployet på k3s, udgiver to poster —
@@ -82,8 +82,8 @@ I higgs bruger vi to af dets egenskaber:
 ### Flere feeds (temaer og bøger)
 
 Alle feeds står i registry'et `FEEDS` i [build.py](build.py). Et feed er
-enten **genereret** (markdown i `content/<key>/`) eller **vedhæftet** (en
-færdig XML-fil i `feeds/<key>/`, typisk en rettet RSS-fil fra fx LibriVox).
+**genereret** (markdown i `content/<key>/` → Atom) eller **vedhæftet** (en
+færdig XML-fil i `feeds/<key>/`, fx en rettet RSS-fil fra en anden udgiver).
 Tilføjer man en post i registry'et, følger build, ConfigMap,
 nginx-Content-Type og deploy-verifikation automatisk.
 
@@ -92,7 +92,21 @@ Bøger grupperes i temaer via URL-stien — `tao` er temaet, `lieh-tzu` er bogen
 | Feed | Type | URL |
 | --- | --- | --- |
 | Higgs (rod) | genereret Atom | `https://higgs.gihc.online/feed.xml` |
-| Lieh-Tzu | vedhæftet RSS | `https://higgs.gihc.online/tao/lieh-tzu/feed.xml` |
+| Lieh-Tzu | genereret Atom | `https://higgs.gihc.online/tao/lieh-tzu/feed.xml` |
+
+Lieh-Tzu er født som et vedhæftet RSS-feed (rettet LibriVox-fil), men er nu et
+genereret Atom-feed med **selv-hostede medier**: de otte kapitler ligger på
+PVC'en under `media/tao/lieh-tzu/` og serveres fra vores eget domæne. Baggrund:
+LibriVox' `www.archive.org/download/…`-URL'er begyndte at svare HTTP 500 (deres
+`dn…`-dowloadnode fejlede), og uden egne URL'er ville feedet være afhængigt af
+en tredjeparts oppetid. Indspilningerne er i public domain. `src:` i front
+matter skrives derfor altid relativt til **domæneroden** (`media/<sti>`), mens
+entry-id'er fortsat bruger feedets egen sti som anker.
+
+**Rækkefølge:** LibriVox' `pubDate` fandtes ikke i originalen og blev opfundet
+(episode 0 = ældst). Her er tiderne vendt om, så `date` for kapitel 1 er den
+nyeste: podcast-klienter viser normalt nyeste øverst, og dermed står kapitlerne
+i bogens rækkefølge uden at læseren skal ændre sortering.
 
 Stien er abonnements-kontrakten og kan ikke laves om bagefter uden at læserne
 skal tilmelde sig igen. Derfor ligger nye feeds under `higgs.gihc.online` i
@@ -100,21 +114,28 @@ stedet for på et subdomæne pr. bog: nye bøger kræver hverken DNS-record elle
 cert. Vil man have et tema på eget subdomæne (`tao.higgs.gihc.online`), er det
 én linje i `FEEDS` plus en DNS-record og en ingress-regel.
 
-Sådan tilføjer du en vedhæftet bog (fx en LibriVox-indspilning):
+Sådan tilføjer du en genereret bog (normalt vejen):
+
+1. Læg medierne i `media/<tema>/<bog>/` (gitignoreret — uploades med
+   `scripts/deploy.sh --sync-media`).
+2. Opret `content/<tema>/<bog>/YYYY-MM-DD-NN-titel.md` pr. kapitel med `title`,
+   `date` og en `media:`-liste, hvor `src:` er stien fra domæneroden.
+3. Tilføj feedet i `FEEDS` med `kind="generated"`, `content_dir` og `output`
+   samt en ConfigMap i `k8s/kustomization.yaml` og et mount i
+   `k8s/deployment.yaml` (Lieh-Tzu er skabelonen).
+4. `make verify`, derefter `scripts/deploy.sh --sync-media` — verifikationen
+   dækker alle feeds i registry'et.
+
+Sådan tilføjer du en vedhæftet bog (kun hvis kilden er en færdig XML, og
+medierne bliver liggende hos udgiveren):
 
 1. Læg XML-filen i `feeds/<tema>/<bog>/feed.xml`, og ret
    `<atom:link rel="self">` til den URL, feedet udgives på — `build.py`
    fejler, hvis self-linket ikke matcher registry'et.
 2. Tilføj feedet i `FEEDS` med `kind="attached"`, `content_type=RSS` og
    `output="k8s/feeds/<tema>/<bog>/feed.xml"`.
-3. Tilføj en ConfigMap i `k8s/kustomization.yaml` og et mount i
-   `k8s/deployment.yaml` (Lieh-Tzu er skabelonen).
-4. `make verify`, derefter `scripts/deploy.sh` — verifikationen dækker alle
-   feeds i registry'et.
-
-Genererede feeds under et tema skal have hver sin mediemappe
-(`media/<tema>/<bog>/<slug>/<fil>`) med den fulde sti i `src:`, så slugs og
-medie-URL'er ikke kolliderer på tværs af bøger.
+3. ConfigMap + mount som ovenfor. Feedet kan kun bruges, så længe udgiverens
+   medie-URL'er svarer — det var netop den afhængighed, der ramte Lieh-Tzu.
 
 ## Neutralitets-ankrene
 
@@ -139,10 +160,12 @@ senere uden at bryde noget for læsere.
 ```
 higgs/
 ├── content/                  # markdown-poster pr. feed — kilden til genererede feeds
-│   └── higgs/                # rod-feedet (higgs.gihc.online/feed.xml)
-│       └── 2026-08-31-foerste-post.md
-├── feeds/                    # vedhæftede feeds (XML, committet) pr. tema/bog
-│   └── tao/lieh-tzu/feed.xml
+│   ├── higgs/                # rod-feedet (higgs.gihc.online/feed.xml)
+│   │   └── 2026-08-31-foerste-post.md
+│   └── tao/lieh-tzu/         # Lieh-Tzu: otte kapitler, selv-hostede medier
+├── feeds/                    # valgfrit: vedhæftede XML-feeds (fx tredjeparts-RSS)
+├── media/                    # medier (gitignoreret) — uploades til PVC med --sync-media
+│   └── tao/lieh-tzu/         # Lieh-Tzu: 8 × mp3 + cover.jpg (public domain)
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
 │   ├── deploy.sh             # tunnel + byg + apply + verificér (--sync-media/--sync-ipfs)
@@ -219,8 +242,9 @@ media:
 
 Generatoren beregner filstørrelsen og udsender
 `<link rel="enclosure" …>` med korrekt type, length og stabil href. Stien i
-`src:` er relativ til feedets mappe: rod-feedet bruger `media/<slug>/<fil>`,
-et tema-feed bruger `media/<tema>/<bog>/<slug>/<fil>`.
+`src:` er relativ til **domæneroden** — rod-feedet bruger `media/<slug>/<fil>`,
+et bog-feed bruger `media/<tema>/<bog>/<fil>`. Det matcher nginx-mountet
+(`/media` → PVC'en), uanset hvilken URL-sti feedet selv har.
 
 ### Byg og verificér
 
@@ -294,9 +318,17 @@ at springe over).
 - **Flere feeds: én sti pr. bog, ikke ét subdomæne pr. bog.** `FEEDS` i
   build.py er registry'et; `tao` er et tema i stien og `lieh-tzu` bogen, så en
   ny bog koster en registry-post (plus ConfigMap-mount) og hverken DNS-record
-  eller cert. Vedhæftede feeds vælges, hvor kilden er en færdig XML-fil
-  (fx rettede LibriVox-RSS-filer med eksterne archive.org-enclosures) — det
-  holder originalmetadata og `guid`'er urørte.
+  eller cert.
+- **Selv-hostede medier frem for tredjeparts-URL'er.** Lieh-Tzu startede som
+  vedhæftet RSS med enclosures på `www.archive.org/download/…`. Da archive.orgs
+  download-proxy begyndte at svare HTTP 500 (og Cloudflare-fejl i browseren),
+  blev de otte filer hentet ned og lagt på PVC'en. Feedet er nu genereret Atom
+  med vores egne, stabile URL'er — samme afhængighedsprincip som resten af
+  higgs. LibriVox' indspilninger er i public domain, så det er uproblematisk.
+- **Atom frem for RSS for vores egne feeds.** Generatoren udgiver Atom, og det
+  virker i både rod-feedet og tao-feedet (testet i AntennaPod). RSS 2.0 med
+  `itunes:`-tags er fortsat nødvendigt, hvis et feed skal godkendes i Apple
+  Podcasts — bliver det et krav, skal generatoren kunne begge formater.
 - **Tidspunkt i `date` styrer rækkefølgen i læserne.** Feed-læsere (fx
   AntennaPod) sorterer selv på `published`/`updated` og garanterer ikke at
   følge XML-rækkefølgen. Uden tidspunkt får flere poster samme dag samme
