@@ -95,6 +95,12 @@ Bøger grupperes i temaer via URL-stien — `tao` er temaet, `lieh-tzu` er bogen
 | --- | --- | --- |
 | Higgs (rod) | genereret Atom | `https://higgs.gihc.online/feed.xml` |
 | Lieh-Tzu | genereret Atom | `https://higgs.gihc.online/tao/lieh-tzu/feed.xml` |
+| The Sayings of Lao Tzu | genereret Atom | `https://higgs.gihc.online/tao/sayings-of-lao-tzu/feed.xml` |
+
+De to tao-bøger er importeret med `scripts/import-librivox.py` og har
+selv-hostede medier på PVC'en. Begge er Lionel Giles-oversættelser (samme
+ophavsretsnuance: PD i USA, beskyttet i DK/EU til og med 2028) og linker til
+deres kapitler på Wikisource i den form AntennaPod kan gøre klikbar.
 
 Lieh-Tzu er født som et vedhæftet RSS-feed (rettet LibriVox-fil), men er nu et
 genereret Atom-feed med **selv-hostede medier**: de otte kapitler ligger på

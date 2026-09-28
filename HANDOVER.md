@@ -76,6 +76,20 @@ forbliver nginx over HTTPS. Se dialog-notatet
 
 ## Fase 3 — flere feeds (tao m.fl.)
 
+**Feeds i drift:** rod-feedet (`/feed.xml`) og bøgerne `/tao/lieh-tzu/feed.xml`
+og `/tao/sayings-of-lao-tzu/feed.xml` — alle genereret Atom med selv-hostede
+medier på PVC'en.
+
+**The Sayings of Lao Tzu** (tilføjet 2026-09-28): LibriVox-item
+`sayings_of_lao_tzu_1809_librivox` (RSS 12948), læst af Nemo, 10 afsnit
+(Introduction + 9 kapitler), 36,6 MB, importeret med
+`scripts/import-librivox.py --theme tao --book sayings-of-lao-tzu`. Også en
+**Lionel Giles**-oversættelse, altså samme ophavsretsnuance som Lieh-Tzu (PD i
+USA, beskyttet i DK/EU til og med 2028). Hvert afsnit linker til sit
+Wikisource-kapitel (`The Sayings of Lao Tzŭ`: Introduction + Chapter 1–9,
+verificeret 1:1 mod lyden) både som `external_url` og som synlig URL i
+beskrivelsen.
+
 Design: ét repo, mange feeds. `FEEDS` i `build.py` er registry'et — hver post
 har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 `SITE_BASE` er fortsat det eneste sted, domænet lever.

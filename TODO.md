@@ -170,6 +170,20 @@
 - [ ] **Afventer bruger:** push + `scripts/deploy.sh`; derefter genindlæses
       feedet i AntennaPod (ingen ny tilmelding nødvendig — entry-id'er og
       datoer er uændrede)
+- [x] **Bog nr. 2 i tao: The Sayings of Lao Tzu** importeret med
+      `scripts/import-librivox.py --theme tao --book sayings-of-lao-tzu --rss
+      https://librivox.org/rss/12948`. Item `sayings_of_lao_tzu_1809_librivox`,
+      10 afsnit (Intro + 9 kapitler), 36,6 MB, alle filer md5-verificeret mod
+      archive.org. Læser: Nemo. Også en Lionel Giles-oversættelse — samme
+      ophavsretsnuance som Lieh-Tzu (PD i USA, DK/EU til og med 2028).
+- [x] Samme behandling som Lieh-Tzu: hvert afsnit har `external_url` til sit
+      Wikisource-kapitel (Introduction + Chapter 1–9, verificeret 1:1 mod
+      lydens inddeling) og en synlig URL i beskrivelsen, så AntennaPod kan
+      linkificere den. Alle ti links svarer HTTP 200; kapitel 1 har den nyeste
+      dato, så listen står i læserækkefølge.
+- [ ] **Afventer bruger:** `scripts/deploy.sh --sync-media` (+ evt.
+      `--sync-ipfs`) og tilmelding af
+      `https://higgs.gihc.online/tao/sayings-of-lao-tzu/feed.xml`
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 
