@@ -70,7 +70,8 @@ echo "== deploy =="
 "${KUBECTL[@]}" -n higgs rollout status deployment/ipfs-gateway --timeout=180s
 
 if [ "$SYNC_MEDIA" = 1 ]; then
-    if [ -d media ] && find media -type f | grep -q .; then
+    # Uden pipe af samme grund som i verifikationen ovenfor (SIGPIPE/pipefail).
+    if [ -n "$(find media -type f -print -quit 2>/dev/null)" ]; then
         echo "== sync-media =="
         POD="$("${KUBECTL[@]}" -n higgs get pod -l app=higgs -o jsonpath='{.items[0].metadata.name}')"
         "${KUBECTL[@]}" cp media/ "higgs/$POD:/usr/share/nginx/html/"
@@ -92,20 +93,32 @@ echo "== verificér =="
 while IFS=$'\t' read -r KEY URL CONTENT_TYPE TITLE; do
     attempt=0
     while [ "$attempt" -lt 10 ]; do
-        HTTP_CT="$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$URL" || true)"
-        [ "${HTTP_CT%% *}" = "200" ] && break
+        # Hele svaret hentes i én request: sidste linje er "kode content-type"
+        # (curl -w), resten er kroppen. Bevidst uden pipe: `curl … | grep -q`
+        # giver falske fejl med pipefail, fordi grep lukker røret så snart den
+        # har matchet, hvorefter curl afbrydes med exit 23 midt i svaret.
+        RESPONSE="$(curl -sS -w $'\n%{http_code} %{content_type}' "$URL" || true)"
+        HTTP_CT="${RESPONSE##*$'\n'}"
+        CODE="${HTTP_CT%% *}"
+        CT="${HTTP_CT#* }"
+        BODY="${RESPONSE%$'\n'*}"
+        [ "$CODE" = "200" ] && break
         attempt=$((attempt + 1))
-        echo "verificér: $KEY — HTTP ${HTTP_CT%% *} — prøver igen om 3 s ($attempt/10)"
+        echo "verificér: $KEY — HTTP ${CODE:-ingen respons} — prøver igen om 3 s ($attempt/10)"
         sleep 3
     done
-    CODE="${HTTP_CT%% *}"
-    CT="${HTTP_CT#* }"
     [ "$CODE" = "200" ] || { echo "FEJL: HTTP ${CODE:-ingen respons} på $URL efter 10 forsøg" >&2; exit 1; }
     case "$CT" in
         "$CONTENT_TYPE"*) ;;
         *) echo "FEJL: $KEY — Content-Type er '$CT' (forventet $CONTENT_TYPE)" >&2; exit 1 ;;
     esac
-    curl -sS "$URL" | grep -qF "<title>${TITLE}</title>" \
-        || { echo "FEJL: $KEY — titlen er ikke '${TITLE}'" >&2; exit 1; }
+    case "$BODY" in
+        *"<title>${TITLE}</title>"*) ;;
+        *)
+            FOUND="$(grep -m2 -o '<title>[^<]*' <<<"$BODY" | tr '\n' ' ' || true)"
+            echo "FEJL: $KEY — titlen er ikke '${TITLE}' ($URL; fandt: ${FOUND:-ingen titel fundet})" >&2
+            exit 1
+            ;;
+    esac
     echo "OK: $KEY — HTTP 200, $CT, titel '${TITLE}'"
 done < <(python3 build.py --list)

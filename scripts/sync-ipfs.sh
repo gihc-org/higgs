@@ -20,7 +20,9 @@ KUBECONFIG="${KUBECONFIG:-$HOME/.kube/gihc.yml}"
 export KUBECONFIG
 KUBECTL=(kubectl)
 
-if ! find media -type f 2>/dev/null | grep -q .; then
+# Uden pipe: `find … | grep -q` kan fejle med pipefail, når grep lukker røret,
+# før find er færdig (SIGPIPE).
+if [ -z "$(find media -type f -print -quit 2>/dev/null)" ]; then
     echo "intet i media/ — intet at pinne"
     exit 0
 fi
