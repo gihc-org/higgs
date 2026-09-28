@@ -171,6 +171,12 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 - **Deploy afbryder hvis medier mangler:** `deploy.sh` bygger med
   `--strict-media` (media/ er ikke i git, så et friskt checkout har dem ikke).
   Undtagelsen er `--allow-missing-media`. `make build` uden flag advarer blot.
+- **Ny maskine / friskt clone:** `make fetch-media` henter `media/` over HTTPS
+  fra det udgivne site (fil-listen kommer fra front matter + `logo:`, og
+  størrelsen verificeres mod Content-Length). Alternativt kan man hente den
+  kopi nginx serverer med `kubectl cp` fra pod'ens
+  `/usr/share/nginx/html/media/`. Medierne findes altså tre steder: den
+  maskine de blev lagt ind fra, PVC'en og IPFS-pinnerne.
 
 ## Logo
 

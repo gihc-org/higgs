@@ -175,7 +175,9 @@ lægge ind senere:
    domæne-/host-skift er én linje + en ingress-ændring.
 3. **Git er sandheden, serveren er en kopi.** Alle feeds kan altid genskabes
    med `make build` (vedhæftede feeds kopieres fra `feeds/`). Serveren er et
-   udstillingsvindue, ikke en database.
+   udstillingsvindue, ikke en database. Medierne er den ene undtagelse — de
+   ligger ikke i git, men hentes tilbage med `make fetch-media` (eller fra
+   IPFS), så også de kan genskabes.
 
 Sammen betyder de, at vi kan skifte hosting, domæne eller distributionsform
 senere uden at bryde noget for læsere.
@@ -193,11 +195,12 @@ higgs/
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
 ├── scripts/
 │   ├── deploy.sh             # tunnel + byg + apply + verificér (--sync-media/--sync-ipfs)
+│   ├── fetch-media.py        # hent media/ over HTTPS til en ny maskine
 │   ├── import-librivox.py    # importér en LibriVox-bog (medier + poster + registry)
 │   ├── sync-ipfs.sh          # pin media/ i gateway-pod'en (wrap-mappe-CIDs)
 │   └── create-dns-record.sh  # A-record hos Simply.com — IP som arg eller udledt fra zonen
 ├── build.py                  # registry (FEEDS) + generator: content/ + feeds/ → k8s/
-├── Makefile                  # build / verify / deploy / sync-media
+├── Makefile                  # build / verify / deploy / sync-media / fetch-media
 ├── k8s/                      # manifests + genererede artefakter
 │   ├── kustomization.yaml    # configMapGenerator: én ConfigMap pr. feed
 │   ├── deployment.yaml       # nginx:alpine, mount af hvert feed på dets sti
@@ -305,6 +308,34 @@ enclosure-links i stilhed. `--allow-missing-media` er den bevidste undtagelse.
 Har du ændret medier, skal du bruge `--sync-media` (eller køre
 `make sync-media` bagefter); skal IPFS-enclosure-URL'erne virke, kør
 `--sync-ipfs` (eller `scripts/sync-ipfs.sh` bagefter). Manuelt svarer flowet til:
+
+### Hent medierne på en ny maskine
+
+Media er ikke i git, så et friskt `git clone` har tom `media/` — og et deploy
+afbryder derfor med vilje. Hent den manglende halvdel over HTTPS fra det
+udgivne site (ingen kubeconfig, ingen SSH, ingen credentials):
+
+```bash
+make fetch-media                        # alt der mangler
+scripts/fetch-media.py --only liehtzu   # kun stier der matcher
+scripts/fetch-media.py --dry-run        # vis kun planen
+```
+
+Fil-listen kommer fra repoet selv (front matter plus feed-artwork), og hver fil
+verificeres mod serverens `Content-Length`. Filer der allerede findes med
+rigtig størrelse springes over, så kommandoen kan køres igen efter en
+afbrydelse. De 85 MB tager sekunder fra vores egen server. Bagefter:
+`make verify BUILD_FLAGS=--strict-media`.
+
+Med klynge-adgang kan man i stedet hente nøjagtig den kopi nginx serverer:
+
+```bash
+POD=$(kubectl -n higgs get pod -l app=higgs -o jsonpath='{.items[0].metadata.name}')
+kubectl cp "higgs/$POD:/usr/share/nginx/html/media/" media/
+```
+
+Når IPFS-DNS'en er løst, bliver gatewayen en tredje kilde — feedet annoncerer
+allerede CID'erne for hver fil.
 
 ```bash
 ssh -N -f -L 6443:localhost:6443 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 hetzner-k3s

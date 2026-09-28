@@ -126,6 +126,13 @@
       Undtagelsen er `--allow-missing-media`. `make build` uden flag er fortsat
       tilladende, så et checkout kan inspiceres; `Makefile` sender `BUILD_FLAGS`
       videre.
+- [x] **`scripts/fetch-media.py` + `make fetch-media`:** henter `media/` over
+      HTTPS fra det udgivne site til en ny maskine. Fil-listen kommer fra
+      front matter plus feed-artwork (`logo:`), størrelsen verificeres mod
+      serverens `Content-Length`, og filer der allerede passer springes over.
+      Testet i et friskt clone: cover og ét kapitel hentet, md5 identisk med
+      originalen, og gentagne kørsler springer over. (Fandt undervejs samme
+      mappe-skal-oprettes-fejl som i build.py — rettet.)
 - [ ] **Afventer beslutning:** hvilke bøger der kommer under `tao` som de
       næste, og hvilke temaer der kommer efter `tao`
 
