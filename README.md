@@ -5,11 +5,13 @@ Et helt simpelt statisk Atom-feed, live på
 Ved siden af det ligger flere feeds pr. bog/tema, fx
 [https://higgs.gihc.online/tao/lieh-tzu/feed.xml](https://higgs.gihc.online/tao/lieh-tzu/feed.xml).
 
-Status: **fase 1 i drift.** Feedet er deployet på k3s, udgiver to poster —
-inkl. den første medie-episode (m4a på PVC) — og feed, medier og logo er
-testet i en rigtig feed-læser (AntennaPod). Fase 2 (IPFS) er undervejs:
-gateway deployet i klyngen og medier pinned — afventer offentlig DNS + cert
-for `ipfs.higgs.gihc.online`.
+Status: **fase 1 og 3 i drift.** Rod-feedet udgiver to poster (inkl. den
+første medie-episode på PVC'en), og under temaer ligger bøger som
+`tao/lieh-tzu` med selv-hostede kapitler. Feed, medier og artwork er testet i
+en rigtig feed-læser (AntennaPod). Fase 2 (IPFS) er deployet internt: gateway
+i klyngen og medier pinnet — afventer fortsat offentlig DNS + cert for
+`ipfs.higgs.gihc.online`. Indtil da er IPFS-enclosure-linkene i feedet døde;
+nginx-linket står først, så afspilning virker.
 
 ## Hvorfor findes higgs?
 
@@ -151,7 +153,8 @@ Sådan tilføjer du en genereret bog i hånden (kilder uden LibriVox-metadata):
 Sådan tilføjer du en vedhæftet bog (kun hvis kilden er en færdig XML, og
 medierne bliver liggende hos udgiveren):
 
-1. Læg XML-filen i `feeds/<tema>/<bog>/feed.xml`, og ret
+1. Læg XML-filen i `feeds/<tema>/<bog>/feed.xml` (mappen findes ikke i dag —
+   opret den, hvis kode-stien tages i brug), og ret
    `<atom:link rel="self">` til den URL, feedet udgives på — `build.py`
    fejler, hvis self-linket ikke matcher registry'et.
 2. Tilføj feedet i `FEEDS` med `kind="attached"`, `content_type=RSS` og
@@ -185,7 +188,6 @@ higgs/
 │   ├── higgs/                # rod-feedet (higgs.gihc.online/feed.xml)
 │   │   └── 2026-08-31-foerste-post.md
 │   └── tao/lieh-tzu/         # Lieh-Tzu: otte kapitler, selv-hostede medier
-├── feeds/                    # valgfrit: vedhæftede XML-feeds (fx tredjeparts-RSS)
 ├── media/                    # medier (gitignoreret) — uploades til PVC med --sync-media
 │   └── tao/lieh-tzu/         # Lieh-Tzu: 8 × mp3 + cover.jpg (public domain)
 ├── logo/                     # logo-arbejde: logo-symmetrisk.svg er kilden
@@ -379,14 +381,18 @@ at springe over).
 
 ## Næste skridt
 
-- Første medie-episode er live; tilføj flere poster/episoder i samme flow
-  (fil i `media/` → front matter med `media:` → `scripts/deploy.sh
-  --sync-media`).
-- Fase 2 (i gang): gateway og CID'er er deployet, medier pinned — mangler
-  offentlig DNS + cert for `ipfs.higgs.gihc.online` (recorden findes i
-  Simplys API, men serveres ikke endnu) og offentlig verifikation.
-- Fase 2 (senere): ipfs-cluster (CRDT) på VPS + Pi + laptop som redundant
+- **Flere bøger:** `scripts/import-librivox.py --theme <tema> --rss
+  <librivox-url>` efterfulgt af `scripts/deploy.sh --sync-media` — scriptet
+  klarer metadata, download med md5-verifikation, poster, registry og
+  manifester, og verificerer selv `build.py` + `kubectl kustomize`.
+- **Fase 2 (i gang):** gateway og CID'er er deployet, medier pinnet — mangler
+  offentlig DNS + cert for `ipfs.higgs.gihc.online` (recorden findes i Simplys
+  API, men serveres ikke endnu) og offentlig verifikation. Overvej at gøre
+  IPFS-enclosures tilvalg, indtil DNS svarer.
+- **Fase 2 (senere):** ipfs-cluster (CRDT) på VPS + Pi + laptop som redundant
   backup af medierne. WebTorrent/Handshake forbliver research indtil videre.
+- **Åbent:** større artwork til Lieh-Tzu (LibriVox' er 300×300); Apple
+  Podcasts kræver RSS 2.0 med `itunes:`-tags, hvis bøgerne en dag skal derind.
 - Følg med i [TODO.md](TODO.md).
 
 ## Licens

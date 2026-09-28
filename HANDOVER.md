@@ -41,8 +41,11 @@ upåvirkede.
 - Fase 1-commits (`4d15a33`, `2bf61d9`) er pushet. Siden da ligger
   `cff57ca` → `154c44a` (fase 2 + alle rettelser) lokalt og afventer
   brugerens push.
-- Fase 3 (flere feeds) ligger på branch `feat/flere-feeds` oven på `trunk` —
-  ikke pushet og ikke deployet.
+- Fase 3 (flere feeds) ligger på branch `feat/flere-feeds` oven på `trunk`:
+  pushet til `origin/feat/flere-feeds`, 9 commits foran `trunk` og intet
+  bagud — altså en ren fast-forward merge, som brugeren laver.
+- Merge + push er brugerens; derefter er `trunk` den gældende gren og
+  `feat/flere-feeds` kan slettes.
 - `TODO.pdf` er untracked og med vilje ikke committet (forældes hurtigt).
 - Media ligger aldrig i git (`.gitignore`); kun lokalt + på PVC.
 
@@ -192,19 +195,22 @@ har URL-sti (`/tao/lieh-tzu/feed.xml`), titel, indholdskilde og Content-Type.
 
 ## Naturlige næste skridt
 
-1. **Deploy fase 3** (`scripts/deploy.sh` på branch `feat/flere-feeds`) og
-   verificér `/tao/lieh-tzu/feed.xml` i AntennaPod; push branchen.
-2. **Løs DNS-blokeringen** for `ipfs.higgs.gihc.online` (afsnittet ovenfor) —
+1. **Merge `feat/flere-feeds` → `trunk`** (fast-forward) og push.
+2. **Deploy én gang** (`scripts/deploy.sh`) så de ryddede Lieh-Tzu-summaries
+   slår igennem live (kosmetisk; id'er og rækkefølge er uændrede).
+3. **Næste bøger:** `scripts/import-librivox.py --theme tao --rss <url>` —
+   scriptet dækker medier, poster, registry og manifester, og verificerede
+   selv `build.py` + `kubectl kustomize` til sidst.
+4. **Løs DNS-blokeringen** for `ipfs.higgs.gihc.online` (afsnittet ovenfor) —
    kræver brugerens Simply-adgang.
-3. Når gatewayen er offentlig: verificér curl + cert; gen-deploy kun hvis cert
+5. Når gatewayen er offentlig: verificér curl + cert; gen-deploy kun hvis cert
    ikke kom.
-4. Flere bøger under `tao` (samme vedhæftede flow) og næste tema.
-5. ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant
+6. Overvej at gøre IPFS-enclosures tilvalg (flag), så feedet ikke annoncerer
+   en sti der ikke svarer, før DNS er løst.
+7. ipfs-cluster (CRDT-consensus) på VPS + Pi + laptop — redundant
    pinning/backup af medierne.
-6. Flere poster/episoder i samme flow (`scripts/deploy.sh --sync-media
-   --sync-ipfs`).
-7. README-noter om WebTorrent/Handshake som research (ikke bygget).
-8. Overblik-projektet ligger uden for dette repo:
+8. README-noter om WebTorrent/Handshake som research (ikke bygget).
+9. Overblik-projektet ligger uden for dette repo:
    `/home/kristian/projects/overblik/README.md` (ikke git-initialiseret
    endnu). Kan verificeres live med `kubectl get ingress -A`.
 

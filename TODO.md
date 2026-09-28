@@ -11,14 +11,17 @@
 > "Læs README.md, TODO.md, AGENTS.md, STRATEGI.md og HANDOVER.md i dette
 > repo, og fortsæt derfra. Følg AGENTS.md: dansk, commit lokalt med
 > [codex:…]-tag hentet fra ~/.codex/config.toml (antag aldrig model-id), og
-> push overlades til brugeren. Kontekst: higgs fase 1 er i drift — statisk
-> Atom-feed på https://higgs.gihc.online/feed.xml med to poster inkl. første
-> medie-episode. Fase 2 (IPFS) er bygget og deployet internt: Kubo-gateway i
-> k3s, medier pinned, feedet indeholder IPFS-enclosure — men
-> ipfs.higgs.gihc.online er ikke offentligt nåelig endnu (DNS-blokering, se
-> HANDOVER). Flere feeds (fase 3) er bygget på branch `feat/flere-feeds`:
-> registry `FEEDS` i build.py, Lieh-Tzu som vedhæftet RSS-feed på
-> /tao/lieh-tzu/feed.xml — afventer deploy. Mål i denne session:
+> push overlades til brugeren. Kontekst: higgs er i drift med flere feeds —
+> rod-feedet på https://higgs.gihc.online/feed.xml og bøger under temaer, fx
+> https://higgs.gihc.online/tao/lieh-tzu/feed.xml (genereret Atom med
+> selv-hostede medier på PVC'en). Nye bøger importeres med
+> scripts/import-librivox.py, der skriver i de markerede
+> "importerede feeds"-blokke i build.py og k8s/ — redigér dem ikke i hånden.
+> Fase 3 (flere feeds) er færdig og i drift; se HANDOVER → Git-tilstand for
+> branch- og merge-status. Fase 2 (IPFS) er deployet internt: gateway i k3s,
+> medier pinnet, men ipfs.higgs.gihc.online mangler stadig offentlig DNS, så
+> IPFS-enclosure-linkene i feedet er døde (nginx-linket står først, så
+> afspilning virker). Mål i denne session:
 > <indsæt mål>."
 
 ## Session 2026-09-28 — flere feeds (tao m.fl.)
